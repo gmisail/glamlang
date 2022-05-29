@@ -9,8 +9,8 @@ type primitive =
         | False
 
 type variable_type = 
-        | name 
-        | Signature of name * list * variable_type (* (int, int) -> int *)
+        | VariableType of name 
+        | Signature of name list * variable_type (* (int, int) -> int *)
 
 type binary_op = 
         | Add
@@ -34,7 +34,7 @@ type unary_op =
         | Negative
 
 type expression = 
-        | Constant of constant
+        | Constant of primitive 
         | Identifier of name
         | BinOp of binary_op * expression * expression 
         | UnOp of unary_op * expression
