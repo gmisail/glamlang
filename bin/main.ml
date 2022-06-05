@@ -1,1 +1,3 @@
-let () = print_endline "Hello, World!"
+open Lexer
+
+let _cst = Lexer.token "hello world"
