@@ -8,9 +8,10 @@ module Token = struct
     | NAME
     | INTEGER
     | FLOAT
+    | BOOL
 
     (* math *)
-    | EQUALS
+    | EQUAL
     | ADD
     | SUB
     | MULT
@@ -19,7 +20,9 @@ module Token = struct
     | GT_EQ
     | LT
     | LT_EQ
-    | DEQUAL
+    | BANG
+    | EQUALITY
+    | NOT_EQUAL
     | COMMA
     | PERIOD
     | COLON
@@ -33,13 +36,9 @@ module Token = struct
     | STRING
 
     (* registered keywords *)
-    | FUNCTION
-    | MODULE
-    | END
-    | VAR
+    | LET 
     | WHILE
     | FOR
-    | IN
     | IF
     | ELSE
 
@@ -63,9 +62,10 @@ module Token = struct
     | NAME -> "NAME"
     | INTEGER -> "INTEGER"
     | FLOAT -> "FLOAT"
+    | BOOL -> "BOOL"
 
     (* math *)
-    | EQUALS -> "EQUALS"
+    | EQUAL -> "EQUALS"
     | ADD -> "ADD"
     | SUB -> "SUB"
     | MULT -> "MULT"
@@ -74,7 +74,9 @@ module Token = struct
     | GT_EQ -> "GREATER_THAN_EQ"
     | LT -> "LESS_THAN"
     | LT_EQ -> "LESS_THAN_EQ"
-    | DEQUAL -> "DEQUAL"
+    | BANG -> "BANG"
+    | EQUALITY -> "DEQUAL"
+    | NOT_EQUAL -> "NOT_EQUAL"
     | PERIOD -> "PERIOD"
     | COMMA -> "COMMA"
     | COLON -> "COLON"
@@ -94,7 +96,7 @@ module Token = struct
     | IF -> "IF"
     | ELSE -> "ELSE"
 
-  let create kind lexeme literal line: token = { 
+  let create kind lexeme literal line = { 
       literal; kind; 
       lexeme; line;
     }
