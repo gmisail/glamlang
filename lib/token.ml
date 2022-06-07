@@ -6,8 +6,7 @@ module Token = struct
 
     (* types *)
     | NAME
-    | INTEGER
-    | FLOAT
+    | NUMBER
     | BOOL
 
     (* math *)
@@ -44,7 +43,8 @@ module Token = struct
 
   type literal_type =
     | STRING_LITERAL of string
-    | INTEGER_LITERAL of int
+    | NUMBER_LITERAL of float
+    | NAME_LITERAL of string
 
   type token = { 
     literal : literal_type option;
@@ -60,8 +60,7 @@ module Token = struct
 
     (* types *)
     | NAME -> "NAME"
-    | INTEGER -> "INTEGER"
-    | FLOAT -> "FLOAT"
+    | NUMBER -> "NUMBER"
     | BOOL -> "BOOL"
 
     (* math *)
