@@ -66,6 +66,12 @@ module Lexer = struct
     match peek_char context with
       | Some character when character = expected_char -> (true, advance context)
       | _ -> (false, context)
+    
+  let is_next_char context expected_char =
+    if is_at_end context then false else
+    match peek_char context with
+      | Some character when character = expected_char -> true
+      | _ -> false
 
   let add_token token context =
     { context with tokens = context.tokens @ [token] }
@@ -79,10 +85,14 @@ module Lexer = struct
   let add_keyword token_type context = 
     add_literal token_type None context
 
-  let add_conditional_token context expected_char token token_fallback =
-    match expect_char context expected_char with
-      | (true, updated_context) -> add_keyword token updated_context
-      | (false, updated_context) -> add_keyword token_fallback updated_context
+  (* check for any of the possible character sequences *)
+  let add_conditional_token context possible_options token_fallback =
+    try
+      let (_, matching_token_type) = 
+        List.find (fun (possible_char, _) -> is_next_char context possible_char) possible_options 
+      in add_keyword matching_token_type (advance context)
+    with
+      Not_found -> add_keyword token_fallback context
 
   let rec add_string context =
     let (is_done, is_error) = match (peek_char context) with 
@@ -150,13 +160,13 @@ module Lexer = struct
       | Some ',' -> add_keyword COMMA advanced_context
       | Some '.' -> add_keyword PERIOD advanced_context
       | Some '+' -> add_keyword ADD advanced_context
-      | Some '-' -> add_keyword SUB advanced_context
+      | Some '-' -> add_conditional_token advanced_context [('>', ARROW)] SUB
       | Some '*' -> add_keyword MULT advanced_context
       | Some '/'  -> add_keyword DIV advanced_context
-      | Some '=' -> add_conditional_token context '=' EQUALITY EQUAL
-      | Some '>' -> add_conditional_token context '=' GT_EQ GT
-      | Some '<' -> add_conditional_token context '=' LT_EQ LT
-      | Some '!' -> add_conditional_token context '=' NOT_EQUAL EQUAL
+      | Some '=' -> add_conditional_token advanced_context [('=', EQUALITY); ('>', THICK_ARROW)] EQUAL
+      | Some '>' -> add_conditional_token advanced_context [('=', GT_EQ)] GT
+      | Some '<' -> add_conditional_token advanced_context [('=', LT_EQ)] LT
+      | Some '!' -> add_conditional_token advanced_context [('=', NOT_EQUAL)] EQUAL
       | Some '"' -> add_string advanced_context
       | c when is_digit c -> add_number advanced_context
       | c when is_alpha c -> add_identifier advanced_context
@@ -175,7 +185,7 @@ module Lexer = struct
 
   let print_tokens tokens = 
     let print_token (token: Token.token) = 
-      Printf.printf "[ %s ]\n" token.lexeme
+      Printf.printf "[ %s ]\n" (Token.type_to_string token.kind)
     in
     List.iter print_token tokens
 end

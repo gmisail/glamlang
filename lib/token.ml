@@ -41,6 +41,9 @@ module Token = struct
     | IF
     | ELSE
 
+    | ARROW
+    | THICK_ARROW
+
   type literal_type =
     | STRING_LITERAL of string
     | NUMBER_LITERAL of float
@@ -74,7 +77,7 @@ module Token = struct
     | LT -> "LESS_THAN"
     | LT_EQ -> "LESS_THAN_EQ"
     | BANG -> "BANG"
-    | EQUALITY -> "DEQUAL"
+    | EQUALITY -> "EQUALITY"
     | NOT_EQUAL -> "NOT_EQUAL"
     | PERIOD -> "PERIOD"
     | COMMA -> "COMMA"
@@ -94,6 +97,9 @@ module Token = struct
     | FOR -> "FOR"
     | IF -> "IF"
     | ELSE -> "ELSE"
+
+    | ARROW -> "ARROW"
+    | THICK_ARROW -> "THICK_ARROW"
 
   let create kind lexeme literal line = { 
       literal; kind; 

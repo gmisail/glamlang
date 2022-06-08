@@ -1,2 +1,3 @@
 (test
- (name glamlang))
+ (name glamlang)
+ (libraries glamlang))
