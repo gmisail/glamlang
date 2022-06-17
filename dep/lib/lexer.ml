@@ -136,6 +136,9 @@ module Lexer = struct
       | "for" -> add_keyword FOR context
       | "if" -> add_keyword IF context
       | "else" -> add_keyword ELSE context
+      | "true" -> add_keyword TRUE context
+      | "false" -> add_keyword FALSE context
+      | "null" -> add_keyword NULL context
       | _ -> add_literal NAME (Some (NAME_LITERAL literal)) context
 
   let scan_token context =

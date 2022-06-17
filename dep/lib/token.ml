@@ -3,12 +3,10 @@ module Token = struct
     (* misc *)
     | ILLEGAL
     | END_OF_FILE
-
     (* types *)
     | NAME
     | NUMBER
     | BOOL
-
     (* math *)
     | EQUAL
     | ADD
@@ -33,25 +31,26 @@ module Token = struct
     | R_BRACKET
     | QUOTE
     | STRING
-
     (* registered keywords *)
-    | LET 
+    | LET
     | WHILE
     | FOR
     | IF
     | ELSE
-
     | ARROW
     | THICK_ARROW
+    | TRUE
+    | FALSE
+    | NULL
 
   type literal_type =
     | STRING_LITERAL of string
-    | NUMBER_LITERAL of float
+    | NUMBER_LITERAL of string
     | NAME_LITERAL of string
 
-  type token = { 
+  type token = {
     literal : literal_type option;
-    lexeme : string; 
+    lexeme : string;
     kind : token_type;
     line : int;
   }
@@ -60,12 +59,10 @@ module Token = struct
     match kind with
     | ILLEGAL -> "ILLEGAL"
     | END_OF_FILE -> "EOF"
-
     (* types *)
     | NAME -> "NAME"
     | NUMBER -> "NUMBER"
     | BOOL -> "BOOL"
-
     (* math *)
     | EQUAL -> "EQUALS"
     | ADD -> "ADD"
@@ -90,19 +87,17 @@ module Token = struct
     | R_BRACKET -> "R_BRACKET"
     | QUOTE -> "QUOTE"
     | STRING -> "STRING"
-
     (* registered keywords *)
     | LET -> "LET"
     | WHILE -> "WHILE"
     | FOR -> "FOR"
     | IF -> "IF"
     | ELSE -> "ELSE"
-
+    | TRUE -> "TRUE"
+    | FALSE -> "FALSE"
     | ARROW -> "ARROW"
     | THICK_ARROW -> "THICK_ARROW"
+    | NULL -> "NULL"
 
-  let create kind lexeme literal line = { 
-      literal; kind; 
-      lexeme; line;
-    }
+  let create kind lexeme literal line = { literal; kind; lexeme; line }
 end
