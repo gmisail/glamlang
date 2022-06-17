@@ -4,7 +4,7 @@ type TokenType int64
 
 const (
 	END_OF_FILE TokenType = iota
-	NAME
+	IDENTIFIER	
 	NUMBER
 	BOOL
 	EQUAL
@@ -44,4 +44,5 @@ const (
 
 type Token struct {
 	Type TokenType
+	Literal string
 }

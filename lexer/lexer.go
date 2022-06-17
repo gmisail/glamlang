@@ -2,6 +2,8 @@ package lexer
 
 import (
 	"container/list"
+	"unicode"
+	"fmt"
 )
 
 type Lexer struct {
@@ -9,6 +11,10 @@ type Lexer struct {
 	line    int
 	input   string
 	Tokens  *list.List
+}
+
+var keywords = map[string] TokenType {
+		
 }
 
 // func (l *Lexer) CurrentToken() *Token {
@@ -45,12 +51,48 @@ func (l *Lexer) AdvanceChar() {
 	l.current += 1
 }
 
-func (l *Lexer) CurrentChar() rune {
-	if l.IsAtEnd() {
-		return rune(0)
+func (l *Lexer) CharAt(i int) rune {
+	if i < len(l.input) && i >= 0 {
+		return rune(l.input[i])
 	}
 
-	return rune(l.input[l.current])
+	return rune(0)
+}
+
+func (l *Lexer) CurrentChar() rune {
+	return l.CharAt(l.current)
+}
+
+func (l *Lexer) PeekChar() rune {
+	return l.CharAt(l.current + 1)
+}
+
+func (l *Lexer) IsLetter(char rune) bool {
+	if unicode.IsLetter(char) || char == '_' { 
+        return true 
+    }
+
+	return false 
+}
+
+func (l *Lexer) ScanKeyword() (TokenType, string) {
+	start := l.current
+
+	for l.IsLetter(l.PeekChar()) || unicode.IsDigit(l.PeekChar()) {
+		l.AdvanceChar()
+	}
+
+	end := l.current
+	literal := l.input[start:(end + 1)]
+
+	fmt.Println(literal)
+
+	if tokenType, ok := keywords[literal]; ok {
+		return tokenType, literal
+	}
+
+	// if the keyword isn't registered, then it is an ID
+	return IDENTIFIER, literal
 }
 
 func (l *Lexer) SkipWhitespace() {
@@ -67,61 +109,76 @@ func (l *Lexer) SkipWhitespace() {
 	}
 }
 
-func (l *Lexer) AddToken(tokenType TokenType) *Token {
-	t := &Token{Type: tokenType}
+func (l *Lexer) AddToken(tokenType TokenType, literal string) *Token {
+	t := &Token{Type: tokenType, Literal: literal }
 	l.Tokens.PushBack(t)
 	return t
 }
 
+func (l *Lexer) AddKeyword(tokenType TokenType) *Token {
+	return l.AddToken(tokenType, "")
+}
+
 func (l *Lexer) ScanToken() bool {
+	l.AdvanceChar()
+
 	if l.IsAtEnd() {
 		return false
 	}
-
-	l.AdvanceChar()
+	
 	l.SkipWhitespace()
 
 	currentChar := l.CurrentChar()
 
 	switch currentChar {
 	case '(':
-		l.AddToken(L_PAREN)
+		l.AddKeyword(L_PAREN)
 	case ')':
-		l.AddToken(R_PAREN)
+		l.AddKeyword(R_PAREN)
 	case '{':
-		l.AddToken(L_BRACE)
+		l.AddKeyword(L_BRACE)
 	case '}':
-		l.AddToken(R_BRACE)
+		l.AddKeyword(R_BRACE)
 	case '[':
-		l.AddToken(L_BRACKET)
+		l.AddKeyword(L_BRACKET)
 	case ']':
-		l.AddToken(R_BRACKET)
+		l.AddKeyword(R_BRACKET)
 	case ',':
-		l.AddToken(COMMA)
+		l.AddKeyword(COMMA)
 	case '.':
-		l.AddToken(PERIOD)
+		l.AddKeyword(PERIOD)
 	case '+':
-		l.AddToken(ADD)
+		l.AddKeyword(ADD)
 	case '-':
-		l.AddToken(SUB)
+		l.AddKeyword(SUB)
 	case '*':
-		l.AddToken(MULT)
+		l.AddKeyword(MULT)
 	case '/':
-		l.AddToken(DIV)
+		l.AddKeyword(DIV)
 	case '=':
-		l.AddToken(EQUAL)
+		l.AddKeyword(EQUAL)
 	case '>':
-		l.AddToken(GT)
+		l.AddKeyword(GT)
 	case '<':
-		l.AddToken(LT)
+		l.AddKeyword(LT)
 	case '!':
-		l.AddToken(BANG)
+		l.AddKeyword(BANG)
 	case ':':
-		l.AddToken(COLON)
+		l.AddKeyword(COLON)
 	case '"':
-		l.AddToken(QUOTE)
+		l.AddKeyword(QUOTE)
 	default:
-		return false
+		if l.IsLetter(currentChar) {
+			tokenType, literal := l.ScanKeyword()
+			
+			if tokenType == IDENTIFIER {
+				l.AddToken(tokenType, literal)
+			} else {
+				l.AddKeyword(tokenType)
+			}
+		} else {
+			panic("Unknown token: " + string(currentChar)) 
+		}
 	}
 
 	return true
