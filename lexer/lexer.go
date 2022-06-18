@@ -11,6 +11,11 @@ type Lexer struct {
 	Tokens  []Token
 }
 
+type TokenPair struct {
+	char      rune
+	tokenType TokenType
+}
+
 var keywords = map[string]TokenType{
 	"let":   LET,
 	"while": WHILE,
@@ -102,6 +107,20 @@ func (l *Lexer) ScanNumber() (TokenType, string) {
 	return tokenType, literal
 }
 
+func (l *Lexer) ScanConditional(options []TokenPair, fallback TokenType) TokenType {
+	nextChar := l.PeekChar()
+
+	for _, option := range options {
+		if option.char == nextChar {
+			l.AdvanceChar()
+
+			return option.tokenType
+		}
+	}
+
+	return fallback
+}
+
 func (l *Lexer) SkipWhitespace() {
 	for {
 		switch l.CurrentChar() {
@@ -163,13 +182,13 @@ func (l *Lexer) ScanToken() bool {
 	case '/':
 		l.AddKeyword(DIV)
 	case '=':
-		l.AddKeyword(EQUAL)
+		l.AddKeyword(l.ScanConditional([]TokenPair{{char: '=', tokenType: EQUALITY}, {char: '>', tokenType: THICK_ARROW}}, EQUAL))
 	case '>':
-		l.AddKeyword(GT)
+		l.AddKeyword(l.ScanConditional([]TokenPair{{char: '=', tokenType: GT_EQ}}, GT))
 	case '<':
-		l.AddKeyword(LT)
+		l.AddKeyword(l.ScanConditional([]TokenPair{{char: '=', tokenType: LT_EQ}}, LT))
 	case '!':
-		l.AddKeyword(BANG)
+		l.AddKeyword(l.ScanConditional([]TokenPair{{char: '=', tokenType: NOT_EQUAL}}, BANG))
 	case ':':
 		l.AddKeyword(COLON)
 	case '"':
