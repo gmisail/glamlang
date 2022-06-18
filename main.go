@@ -1,7 +1,9 @@
 package main
 
-import "github.com/gmisail/glamlang/lexer"
+import (
+	"github.com/gmisail/glamlang/lexer"
+)
 
 func main() {
-	lexer.ScanTokens("[ ] { }           longer_keyword hello world _123_keyword_is_valid")
+	lexer.ScanTokens("123 456.789 432.1")
 }
