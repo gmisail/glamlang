@@ -121,6 +121,30 @@ func (l *Lexer) ScanConditional(options []TokenPair, fallback TokenType) TokenTy
 	return fallback
 }
 
+func (l *Lexer) ScanString() string {
+	// ignore opening quote
+	l.AdvanceChar()
+
+	start := l.current
+
+	for {
+		nextChar := l.PeekChar()
+
+		if nextChar == '"' || nextChar == 0 {
+			break
+		}
+
+		l.AdvanceChar()
+	}
+
+	l.AdvanceChar()
+
+	end := l.current
+	literal := l.input[start:end]
+
+	return literal
+}
+
 func (l *Lexer) SkipWhitespace() {
 	for {
 		switch l.CurrentChar() {
@@ -176,7 +200,7 @@ func (l *Lexer) ScanToken() bool {
 	case '+':
 		l.AddKeyword(ADD)
 	case '-':
-		l.AddKeyword(SUB)
+		l.AddKeyword(l.ScanConditional([]TokenPair{{char: '>', tokenType: ARROW}}, SUB))
 	case '*':
 		l.AddKeyword(MULT)
 	case '/':
@@ -192,7 +216,7 @@ func (l *Lexer) ScanToken() bool {
 	case ':':
 		l.AddKeyword(COLON)
 	case '"':
-		l.AddKeyword(QUOTE)
+		l.AddToken(STRING, l.ScanString())
 	default:
 		if l.IsLetter(currentChar) {
 			tokenType, literal := l.ScanKeyword()

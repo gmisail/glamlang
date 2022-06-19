@@ -55,19 +55,34 @@ func TestNumbers(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-
-}
-
-func TestConditionalTokens(t *testing.T) {
-	lex := lexer.ScanTokens("=> == !=")
+	lex := lexer.ScanTokens("hello \"from way up here\"")
 	expected := []lexer.TokenType{
-		lexer.THICK_ARROW, lexer.EQUALITY, lexer.NOT_EQUAL,
+		lexer.IDENTIFIER, lexer.STRING,
 	}
 
 	numTokens := len(lex.Tokens)
 
-	if numTokens != 3 {
-		t.Errorf("Found %d tokens, expected 3.", numTokens)
+	if numTokens != 2 {
+		t.Errorf("Found %d tokens, expected 2.", numTokens)
+	}
+
+	for i, tok := range lex.Tokens {
+		if tok.Type != expected[i] {
+			t.Errorf("Token '%s' has type %d, expecting %d.", tok.Literal, tok.Type, expected[i])
+		}
+	}
+}
+
+func TestConditionalTokens(t *testing.T) {
+	lex := lexer.ScanTokens("=> == != ->")
+	expected := []lexer.TokenType{
+		lexer.THICK_ARROW, lexer.EQUALITY, lexer.NOT_EQUAL, lexer.ARROW,
+	}
+
+	numTokens := len(lex.Tokens)
+
+	if numTokens != 4 {
+		t.Errorf("Found %d tokens, expected 4.", numTokens)
 	}
 
 	for i, tok := range lex.Tokens {
