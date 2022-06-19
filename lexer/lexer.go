@@ -17,13 +17,14 @@ type TokenPair struct {
 }
 
 var keywords = map[string]TokenType{
-	"let":   LET,
-	"while": WHILE,
-	"for":   FOR,
-	"if":    IF,
-	"else":  ELSE,
-	"true":  TRUE,
-	"false": FALSE,
+	"let":    LET,
+	"while":  WHILE,
+	"for":    FOR,
+	"if":     IF,
+	"else":   ELSE,
+	"true":   TRUE,
+	"false":  FALSE,
+	"return": RETURN,
 }
 
 func (l *Lexer) IsAtEnd() bool {

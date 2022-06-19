@@ -35,6 +35,7 @@ const (
 	FOR
 	IF
 	ELSE
+	RETURN
 	ARROW
 	THICK_ARROW
 	TRUE
