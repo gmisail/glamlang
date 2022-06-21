@@ -4,4 +4,10 @@ let square : (int) -> int = (y: int) => {
     return y * y
 }
 
-square(x)
+let message : string = "hello
+world
+from this
+very long
+string"
+
+let z: int = square(x)

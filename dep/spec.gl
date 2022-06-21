@@ -1,5 +1,0 @@
-let x : int = 100
-
-let square : (int) -> int = (y: int) => {
-    return y * y
-}

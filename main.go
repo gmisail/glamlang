@@ -2,8 +2,6 @@ package main
 
 import (
 	"os"
-
-	"github.com/gmisail/glamlang/lexer"
 )
 
 func main() {
@@ -13,7 +11,7 @@ func main() {
 		panic(err)
 	}
 
-	l := lexer.ScanTokens(string(fileData))
+	l := ScanTokens(string(fileData))
 
 	for _, tok := range l.Tokens {
 		tok.Print()
