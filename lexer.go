@@ -115,7 +115,7 @@ func (l *Lexer) ScanNumber() (*Token, *LexerError) {
 	end := l.current
 	literal := l.input[start:(end + 1)]
 
-	return &Token{tokenType, literal}, nil
+	return &Token{ Type: tokenType, Literal: literal}, nil
 }
 
 func (l *Lexer) ScanConditional(options []TokenPair, fallback TokenType) TokenType {

@@ -1,19 +1,24 @@
 package main
 
 import (
-	"os"
+	//	"os"
+	"fmt"
 )
 
 func main() {
-	fileData, err := os.ReadFile("./demo.gl")
+	/*	fileData, err := os.ReadFile("./demo.gl")
+
+		if err != nil {
+			panic(err)
+		}
+	*/
+	l := ScanTokens("5 * (100 - 5)")
+
+	ast, err := Parse(l.Tokens)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
-	l := ScanTokens(string(fileData))
-
-	for _, tok := range l.Tokens {
-		tok.Print()
-	}
+	fmt.Println(ast.String())
 }

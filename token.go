@@ -141,4 +141,5 @@ func (t *Token) Print() {
 type Token struct {
 	Type    TokenType
 	Literal string
+	Line int
 }

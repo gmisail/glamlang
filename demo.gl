@@ -11,3 +11,11 @@ very long
 string"
 
 let z: int = square(x)
+
+let demo_file : File? = file.open("demo.gl")
+
+if demo_file? {
+	
+} else {
+	error("Could not open file.")
+} 
