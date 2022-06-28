@@ -46,3 +46,22 @@ func TestVariableDeclarations(t *testing.T) {
 		t.Errorf("Expected value of y to be \"hello\", got \"%s\"", yValue.Value)
 	}
 }
+
+func TestFunctionType(t *testing.T) {
+	lex := ScanTokens(`
+		let square : (int, int) -> int
+	`)
+
+	statements := Parse(lex.Tokens)
+
+	if len(statements) != 1 {
+		t.Errorf("Expected %d statements, got %d.", 1, len(statements))
+	}
+
+	variable := statements[0].(*VariableDeclaration)
+	functionType := variable.Type.(*FunctionType)
+
+	if len(functionType.ArgumentTypes) != 2 {
+		t.Errorf("Expected %d statements, got %d.", 2, len(functionType.ArgumentTypes))
+	}
+}

@@ -212,7 +212,26 @@ func (p *Parser) parseExpression() (Expression, error) {
 }
 
 func (p *Parser) parseTypeDeclaration() (TypeDefinition, error) {
-	// if parenthesis then its a function type declaration
+	if p.MatchToken(L_PAREN) {
+		arguments := make([]TypeDefinition, 0)
+
+		for {
+			argumentType, _ := p.parseTypeDeclaration()
+			arguments = append(arguments, argumentType)
+
+			// TODO: handle me
+
+			if !p.MatchToken(COMMA) && p.MatchToken(R_PAREN) {
+				break
+			}
+		}
+
+		p.Consume(ARROW, "Expected '->' after argument type declaration.")
+
+		returnType, _ := p.parseTypeDeclaration()
+
+		return &FunctionType{ArgumentTypes: arguments, ReturnType: returnType}, nil
+	}
 
 	name, _ := p.Consume(IDENTIFIER, "Expected type name.")
 	isOptional := p.MatchToken(QUESTION)

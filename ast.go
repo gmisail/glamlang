@@ -25,6 +25,12 @@ type VariableType struct {
 	SubType  *VariableType
 }
 
+type FunctionType struct {
+	TypeDefinition
+	ArgumentTypes []TypeDefinition
+	ReturnType    TypeDefinition
+}
+
 type VariableDeclaration struct {
 	Statement
 	Name  string
