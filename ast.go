@@ -10,6 +10,33 @@ type Expression interface {
 	Node
 }
 
+type Statement interface {
+	Node
+}
+
+type TypeDefinition interface {
+	Node
+}
+
+type VariableType struct {
+	TypeDefinition
+	Base     string
+	Optional bool
+	SubType  *VariableType
+}
+
+type VariableDeclaration struct {
+	Statement
+	Name  string
+	Type  TypeDefinition
+	Value Expression
+}
+
+type ExpressionStatement struct {
+	Statement
+	Value Expression
+}
+
 type Unary struct {
 	Expression
 	Value    Expression
@@ -38,6 +65,11 @@ type Group struct {
 
 func (g *Group) String() string {
 	return fmt.Sprintf("(Group %s)", g.Value.String())
+}
+
+type VariableExpression struct {
+	Expression
+	Value string
 }
 
 type Literal struct {

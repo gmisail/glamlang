@@ -1,21 +1,9 @@
 let x : int = 100
+let y : bool = false
+let z : string = "hello world"
+let PI : float = 3.14
 
-let square : (int) -> int = (y: int) => {
-    return y * y
-}
+let age : int
+let name : string = "graham misail"
 
-let message : string = "hello
-world
-from this
-very long
-string"
-
-let z: int = square(x)
-
-let demo_file : File? = file.open("demo.gl")
-
-if demo_file? {
-	
-} else {
-	error("Could not open file.")
-} 
+let file : string?

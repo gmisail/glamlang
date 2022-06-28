@@ -24,6 +24,7 @@ const (
 	COMMA
 	PERIOD
 	COLON
+	QUESTION
 	L_PAREN
 	R_PAREN
 	L_BRACE
@@ -119,6 +120,8 @@ func tokenTypeToString(token TokenType) string {
 		return "ARROW"
 	case THICK_ARROW:
 		return "THICK_ARROW"
+	case QUESTION:
+		return "QUESTION"
 	case TRUE:
 		return "TRUE"
 	case FALSE:
@@ -141,5 +144,5 @@ func (t *Token) Print() {
 type Token struct {
 	Type    TokenType
 	Literal string
-	Line int
+	Line    int
 }

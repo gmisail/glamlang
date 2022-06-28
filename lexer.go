@@ -115,7 +115,7 @@ func (l *Lexer) ScanNumber() (*Token, *LexerError) {
 	end := l.current
 	literal := l.input[start:(end + 1)]
 
-	return &Token{ Type: tokenType, Literal: literal}, nil
+	return &Token{Type: tokenType, Literal: literal}, nil
 }
 
 func (l *Lexer) ScanConditional(options []TokenPair, fallback TokenType) TokenType {
@@ -230,6 +230,8 @@ func (l *Lexer) ScanToken() bool {
 		l.AddKeyword(COLON)
 	case '"':
 		l.AddToken(STRING, l.ScanString())
+	case '?':
+		l.AddKeyword(QUESTION)
 	case 0:
 		return false
 	default:

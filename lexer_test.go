@@ -1,11 +1,11 @@
-package main_test
+package main
 
 import (
 	"testing"
 )
 
 func TestNumberOfTokens(t *testing.T) {
-	lex := lexer.ScanTokens("[](){}.,    +-*/")
+	lex := ScanTokens("[](){}.,    +-*/")
 
 	numTokens := len(lex.Tokens)
 
@@ -15,9 +15,9 @@ func TestNumberOfTokens(t *testing.T) {
 }
 
 func TestKeywords(t *testing.T) {
-	lex := lexer.ScanTokens("hello let while for if else true false")
-	expected := []lexer.TokenType{
-		lexer.IDENTIFIER, lexer.LET, lexer.WHILE, lexer.FOR, lexer.IF, lexer.ELSE, lexer.TRUE, lexer.FALSE,
+	lex := ScanTokens("hello let while for if else true false")
+	expected := []TokenType{
+		IDENTIFIER, LET, WHILE, FOR, IF, ELSE, TRUE, FALSE,
 	}
 
 	numTokens := len(lex.Tokens)
@@ -34,9 +34,9 @@ func TestKeywords(t *testing.T) {
 }
 
 func TestNumbers(t *testing.T) {
-	lex := lexer.ScanTokens("100 123456 12.14 5000.00")
-	expected := []lexer.TokenType{
-		lexer.INT, lexer.INT, lexer.FLOAT, lexer.FLOAT,
+	lex := ScanTokens("100 123456 12.14 5000.00")
+	expected := []TokenType{
+		INT, INT, FLOAT, FLOAT,
 	}
 
 	numTokens := len(lex.Tokens)
@@ -53,9 +53,9 @@ func TestNumbers(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	lex := lexer.ScanTokens("hello \"from way up here\"")
-	expected := []lexer.TokenType{
-		lexer.IDENTIFIER, lexer.STRING,
+	lex := ScanTokens("hello \"from way up here\"")
+	expected := []TokenType{
+		IDENTIFIER, STRING,
 	}
 
 	numTokens := len(lex.Tokens)
@@ -72,9 +72,9 @@ func TestString(t *testing.T) {
 }
 
 func TestConditionalTokens(t *testing.T) {
-	lex := lexer.ScanTokens("=> == != ->")
-	expected := []lexer.TokenType{
-		lexer.THICK_ARROW, lexer.EQUALITY, lexer.NOT_EQUAL, lexer.ARROW,
+	lex := ScanTokens("=> == != ->")
+	expected := []TokenType{
+		THICK_ARROW, EQUALITY, NOT_EQUAL, ARROW,
 	}
 
 	numTokens := len(lex.Tokens)
