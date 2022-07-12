@@ -43,6 +43,11 @@ type ExpressionStatement struct {
 	Value Expression
 }
 
+type BlockStatement struct {
+	Statement
+	Statements []Statement
+}
+
 type Unary struct {
 	Expression
 	Value    Expression

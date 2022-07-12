@@ -4,6 +4,15 @@ let z : string = "hello world"
 let PI : float = 3.14
 
 let age : int
-let name : string = "graham misail"
+let g : bool
+let e : string
 
-let file : string?
+let name : string = "graham misail"
+let middle_name : string?
+
+let mult : (int, int) -> int 
+let map : (list, (element) -> element) -> list
+
+{
+    let test : int = 100
+}

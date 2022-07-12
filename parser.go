@@ -266,6 +266,27 @@ func (p *Parser) parseDeclaration() (Statement, error) {
 	return p.parseStatement()
 }
 
+func (p *Parser) parseBlockStatement() (Statement, error) {
+	statements := make([]Statement, 0)
+
+	// TODO: make function for "check"
+	for p.CurrentToken().Type != R_BRACE /*&& is not at end */ {
+		statement, _ := p.parseDeclaration()
+
+		if statement == nil {
+			break
+		}
+
+		// TODO: handle error
+
+		statements = append(statements, statement)
+	}
+
+	p.Consume(R_BRACE, "Expected '}' after block")
+
+	return &BlockStatement{Statements: statements}, nil
+}
+
 func (p *Parser) parseExpressionStatement() (Statement, error) {
 	expression, err := p.parseExpression()
 
@@ -282,9 +303,10 @@ func (p *Parser) parseStatement() (Statement, error) {
 		return nil, nil
 	}
 
-	// if p.MatchToken() {
-
-	// }
+	// block statement
+	if p.MatchToken(L_BRACE) {
+		return p.parseBlockStatement()
+	}
 
 	return p.parseExpressionStatement()
 }
