@@ -21,6 +21,8 @@ if age >= 21 {
 	let can_drink : bool = true
 }
 
+let can_drink : bool = age >= 21
+
 if name == "graham" {
 
 } else {
@@ -39,6 +41,5 @@ while age < 21 {
 	let can_drink : bool = false
 }
 
-let mult : (int, int) -> int = fun(x, y) {
-	let res : int = x * y
-}
+let div : (int, int) -> int = fun(x, y) => x / y
+let mult : (int, int) -> int = fun(x, y) => x * y

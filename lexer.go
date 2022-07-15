@@ -30,7 +30,6 @@ var keywords = map[string]TokenType{
 	"else":   ELSE,
 	"true":   TRUE,
 	"false":  FALSE,
-	"return": RETURN,
 	"fun":    FUNCTION,
 }
 

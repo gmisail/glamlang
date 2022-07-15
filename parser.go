@@ -129,6 +129,8 @@ func (p *Parser) parseFunction() (Expression, error) {
 			}
 		}
 
+		p.Consume(THICK_ARROW, "Expected '=>' after parameter defintion.")
+
 		body, _ := p.parseStatement()
 
 		return &FunctionExpression{Parameters: parameters, Body: body}, nil
