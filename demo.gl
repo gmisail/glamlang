@@ -10,9 +10,35 @@ let e : string
 let name : string = "graham misail"
 let middle_name : string?
 
-let mult : (int, int) -> int 
 let map : (list, (element) -> element) -> list
 
 {
     let test : int = 100
+	let sum : int = test + 100
+}
+
+if age >= 21 { 
+	let can_drink : bool = true
+}
+
+if name == "graham" {
+
+} else {
+
+}
+
+if middle_name {
+
+} else if mult {
+
+} else {
+
+}
+
+while age < 21 {
+	let can_drink : bool = false
+}
+
+let mult : (int, int) -> int = fun(x, y) {
+	let res : int = x * y
 }

@@ -108,6 +108,35 @@ func (p *Parser) parsePrimary() (Expression, error) {
 	return nil, nil
 }
 
+func (p *Parser) parseFunction() (Expression, error) {
+	// fun(a, b){}
+
+	if p.MatchToken(FUNCTION) {
+		parameters := make([]string, 0)
+
+		p.Consume(L_PAREN, "Expected '('")
+
+		// if there's a right parenthesis, that means the function doesn't have any parameters.
+		if !p.MatchToken(R_PAREN) {
+			for {
+				parameter, _ := p.Consume(IDENTIFIER, "Expected parameter name.")
+				parameters = append(parameters, parameter.Literal)
+
+				// no more parameters :(
+				if !p.MatchToken(COMMA) && p.MatchToken(R_PAREN) {
+					break
+				}
+			}
+		}
+
+		body, _ := p.parseStatement()
+
+		return &FunctionExpression{Parameters: parameters, Body: body}, nil
+	}
+
+	return p.parsePrimary()
+}
+
 func (p *Parser) parseUnary() (Expression, error) {
 	if p.MatchToken(BANG, SUB) {
 		op := p.PreviousToken()
@@ -120,7 +149,7 @@ func (p *Parser) parseUnary() (Expression, error) {
 		return &Unary{Value: expr, Operator: op.Type}, nil
 	}
 
-	return p.parsePrimary()
+	return p.parseFunction()
 }
 
 func (p *Parser) parseFactor() (Expression, error) {
@@ -287,6 +316,27 @@ func (p *Parser) parseBlockStatement() (Statement, error) {
 	return &BlockStatement{Statements: statements}, nil
 }
 
+func (p *Parser) parseIfStatement() (Statement, error) {
+	condition, _ := p.parseExpression()
+	ifBranch, _ := p.parseStatement()
+
+	var elseBranch Statement = nil
+
+	if p.MatchToken(ELSE) {
+		elseBranchStatement, _ := p.parseStatement()
+		elseBranch = elseBranchStatement
+	}
+
+	return &IfStatement{Condition: condition, Body: ifBranch, ElseBody: elseBranch}, nil
+}
+
+func (p *Parser) parseWhileStatement() (Statement, error) {
+	condition, _ := p.parseExpression()
+	body, _ := p.parseStatement()
+
+	return &WhileStatement{Condition: condition, Body: body}, nil
+}
+
 func (p *Parser) parseExpressionStatement() (Statement, error) {
 	expression, err := p.parseExpression()
 
@@ -303,9 +353,12 @@ func (p *Parser) parseStatement() (Statement, error) {
 		return nil, nil
 	}
 
-	// block statement
 	if p.MatchToken(L_BRACE) {
 		return p.parseBlockStatement()
+	} else if p.MatchToken(IF) {
+		return p.parseIfStatement()
+	} else if p.MatchToken(WHILE) {
+		return p.parseWhileStatement()
 	}
 
 	return p.parseExpressionStatement()

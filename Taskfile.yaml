@@ -1,0 +1,8 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - gofmt -w .
+      - go build .
+      - ./glamlang

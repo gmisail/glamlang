@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 )
 
 func main() {
@@ -15,6 +16,10 @@ func main() {
 	l := ScanTokens(string(fileData))
 
 	statements := Parse(l.Tokens)
+
+	for _, s := range statements {
+		fmt.Println(reflect.TypeOf(s))
+	}
 
 	fmt.Println(len(statements))
 }

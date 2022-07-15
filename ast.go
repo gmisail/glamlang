@@ -31,6 +31,13 @@ type FunctionType struct {
 	ReturnType    TypeDefinition
 }
 
+type Logical struct {
+	Expression
+	Left     Expression
+	Right    Expression
+	Operator TokenType
+}
+
 type VariableDeclaration struct {
 	Statement
 	Name  string
@@ -46,6 +53,19 @@ type ExpressionStatement struct {
 type BlockStatement struct {
 	Statement
 	Statements []Statement
+}
+
+type IfStatement struct {
+	Statement
+	Condition Expression
+	Body      Statement
+	ElseBody  Statement
+}
+
+type WhileStatement struct {
+	Statement
+	Condition Expression
+	Body      Statement
 }
 
 type Unary struct {
@@ -76,6 +96,12 @@ type Group struct {
 
 func (g *Group) String() string {
 	return fmt.Sprintf("(Group %s)", g.Value.String())
+}
+
+type FunctionExpression struct {
+	Expression
+	Parameters []string
+	Body       Statement
 }
 
 type VariableExpression struct {
