@@ -1,0 +1,21 @@
+print("Username:")
+let name : string = input()
+
+print("Password:")
+let password : string = input()
+
+let user : User? = get_user_by_name(name)
+
+# note the lack of the optional. This function expects 
+# User to be well defined.
+let check : (User, string) -> bool = (u, pass) => {
+	user.validate_password(password)
+}
+
+let is_auth : bool = if check(user, password) else false
+
+if is_auth {
+	print("Correct password!")
+} else {
+	print("Incorrect password :(")
+}
