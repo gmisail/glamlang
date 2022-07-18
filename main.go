@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"reflect"
 )
 
 func main() {
@@ -18,7 +17,9 @@ func main() {
 	statements := Parse(l.Tokens)
 
 	for _, s := range statements {
-		fmt.Println(reflect.TypeOf(s))
+		//fmt.Println(reflect.TypeOf(s))
+
+		fmt.Println(s.String())
 	}
 
 	fmt.Println(len(statements))

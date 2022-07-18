@@ -40,6 +40,7 @@ const (
 	ELSE
 	RETURN
 	FUNCTION
+	STRUCT
 	ARROW
 	THICK_ARROW
 	TRUE
@@ -117,6 +118,8 @@ func tokenTypeToString(token TokenType) string {
 		return "ELSE"
 	case RETURN:
 		return "RETURN"
+	case STRUCT:
+		return "STRUCT"
 	case ARROW:
 		return "ARROW"
 	case THICK_ARROW:

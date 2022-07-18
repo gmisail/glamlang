@@ -31,6 +31,7 @@ var keywords = map[string]TokenType{
 	"true":   TRUE,
 	"false":  FALSE,
 	"fun":    FUNCTION,
+	"struct": STRUCT,
 }
 
 func (l *LexerError) Error() string {

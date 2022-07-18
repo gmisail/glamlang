@@ -109,8 +109,6 @@ func (p *Parser) parsePrimary() (Expression, error) {
 }
 
 func (p *Parser) parseFunction() (Expression, error) {
-	// fun(a, b){}
-
 	if p.MatchToken(FUNCTION) {
 		parameters := make([]string, 0)
 
@@ -289,6 +287,28 @@ func (p *Parser) parseVariableDeclaration() (Statement, error) {
 	return &VariableDeclaration{Name: name.Literal, Type: variableType, Value: value}, nil
 }
 
+func (p *Parser) parseStructDeclaration() (Statement, error) {
+	identifier, _ := p.Consume(IDENTIFIER, "Expected name after struct definition.")
+	variables := make([]VariableDeclaration, 0)
+
+	p.Consume(L_BRACE, "Expected '{' when declaring struct.")
+
+	for {
+		variableName, _ := p.Consume(IDENTIFIER, "Expected variable name")
+
+		p.Consume(COLON, "Expected ':' after variable name.")
+
+		variableType, _ := p.parseTypeDeclaration()
+		variables = append(variables, VariableDeclaration{Name: variableName.Literal, Type: variableType, Value: nil})
+
+		if !p.MatchToken(COMMA) && p.MatchToken(R_BRACE) {
+			break
+		}
+	}
+
+	return &StructDeclaration{Name: identifier.Literal, Variables: variables}, nil
+}
+
 func (p *Parser) parseDeclaration() (Statement, error) {
 	if p.MatchToken(LET) {
 		return p.parseVariableDeclaration()
@@ -361,6 +381,8 @@ func (p *Parser) parseStatement() (Statement, error) {
 		return p.parseIfStatement()
 	} else if p.MatchToken(WHILE) {
 		return p.parseWhileStatement()
+	} else if p.MatchToken(STRUCT) {
+		return p.parseStructDeclaration()
 	}
 
 	return p.parseExpressionStatement()

@@ -14,11 +14,11 @@ let map : (list, (element) -> element) -> list
 
 {
     let test : int = 100
-	let sum : int = test + 100
+    let sum : int = test + 100
 }
 
 if age >= 21 { 
-	let can_drink : bool = true
+    let can_drink : bool = true
 }
 
 let can_drink : bool = age >= 21
@@ -38,8 +38,14 @@ if middle_name {
 }
 
 while age < 21 {
-	let can_drink : bool = false
+    let can_drink : bool = false
 }
 
 let div : (int, int) -> int = fun(x, y) => x / y
 let mult : (int, int) -> int = fun(x, y) => x * y
+
+struct Album {
+    name: string,
+    artist: string,
+    award: album
+}
