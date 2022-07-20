@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/gmisail/glamlang/lexer"
+	"github.com/gmisail/glamlang/parser"
 	"os"
 )
 
@@ -12,9 +14,9 @@ func main() {
 		panic(err)
 	}
 
-	l := ScanTokens(string(fileData))
+	l := lexer.ScanTokens(string(fileData))
 
-	statements := Parse(l.Tokens)
+	statements := parser.Parse(l.Tokens)
 
 	for _, s := range statements {
 		//fmt.Println(reflect.TypeOf(s))

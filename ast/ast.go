@@ -1,6 +1,11 @@
-package main
+package ast
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/gmisail/glamlang/lexer"
+)
 
 type Node interface {
 	String() string
@@ -43,7 +48,7 @@ type Logical struct {
 	Expression
 	Left     Expression
 	Right    Expression
-	Operator TokenType
+	Operator lexer.TokenType
 }
 
 func (l *Logical) String() string {
@@ -58,7 +63,13 @@ type VariableDeclaration struct {
 }
 
 func (v *VariableDeclaration) String() string {
-	return fmt.Sprintf("(VariableDeclaration name: %s, type: %s, value: %s)", v.Name, v.Type.String(), v.Value.String())
+	value := "nil"
+
+	if v.Value != nil {
+		value = v.Value.String()
+	}
+
+	return fmt.Sprintf("(VariableDeclaration name: %s, type: %s, value: %s)", v.Name, v.Type.String(), value)
 }
 
 type StructDeclaration struct {
@@ -68,7 +79,21 @@ type StructDeclaration struct {
 }
 
 func (s *StructDeclaration) String() string {
-	return fmt.Sprintf("(StructDeclaration body: )")
+	var builder strings.Builder
+
+	builder.WriteString("(StructDeclaration [")
+
+	for i, variable := range s.Variables {
+		builder.WriteString(variable.String())
+
+		if i != len(s.Variables)-1 {
+			builder.WriteString(", ")
+		}
+	}
+
+	builder.WriteString("])")
+
+	return builder.String()
 }
 
 type ExpressionStatement struct {
@@ -77,7 +102,7 @@ type ExpressionStatement struct {
 }
 
 func (e *ExpressionStatement) String() string {
-	return fmt.Sprintf("(ExpressionStatement body: )")
+	return fmt.Sprintf("(ExpressionStatement body: %s)", e.Value.String())
 }
 
 type BlockStatement struct {
@@ -113,18 +138,18 @@ func (w *WhileStatement) String() string {
 type Unary struct {
 	Expression
 	Value    Expression
-	Operator TokenType
+	Operator lexer.TokenType
 }
 
 func (u *Unary) String() string {
-	return fmt.Sprintf("(Unary %s %s)", tokenTypeToString(u.Operator), u.Value.String())
+	return fmt.Sprintf("(Unary %s %s)", lexer.TokenTypeToString(u.Operator), u.Value.String())
 }
 
 type Binary struct {
 	Expression
 	Left     Expression
 	Right    Expression
-	Operator TokenType
+	Operator lexer.TokenType
 }
 
 func (b *Binary) String() string {
@@ -157,6 +182,30 @@ type VariableExpression struct {
 
 func (v *VariableExpression) String() string {
 	return fmt.Sprintf("(VariableExpression %s)", v.Value)
+}
+
+type FunctionCall struct {
+	Expression
+	Callee    Expression
+	Arguments []Expression
+}
+
+func (f *FunctionCall) String() string {
+	var builder strings.Builder
+
+	builder.WriteString(fmt.Sprintf("(FunctionCall callee: %s, arguments: [", f.Callee.String()))
+
+	for i, argument := range f.Arguments {
+		builder.WriteString(argument.String())
+
+		if i != len(f.Arguments)-1 {
+			builder.WriteString(", ")
+		}
+	}
+
+	builder.WriteString("])")
+
+	return builder.String()
 }
 
 type Literal struct {

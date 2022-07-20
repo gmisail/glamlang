@@ -1,4 +1,4 @@
-package main
+package lexer
 
 import "fmt"
 
@@ -41,6 +41,8 @@ const (
 	RETURN
 	FUNCTION
 	STRUCT
+	AND
+	OR
 	ARROW
 	THICK_ARROW
 	TRUE
@@ -50,7 +52,7 @@ const (
 	INT
 )
 
-func tokenTypeToString(token TokenType) string {
+func TokenTypeToString(token TokenType) string {
 	switch token {
 	case END_OF_FILE:
 		return "END_OF_FILE"
@@ -120,6 +122,10 @@ func tokenTypeToString(token TokenType) string {
 		return "RETURN"
 	case STRUCT:
 		return "STRUCT"
+	case AND:
+		return "AND"
+	case OR:
+		return "OR"
 	case ARROW:
 		return "ARROW"
 	case THICK_ARROW:
@@ -142,7 +148,7 @@ func tokenTypeToString(token TokenType) string {
 }
 
 func (t *Token) Print() {
-	fmt.Printf("[type: %s, literal: %s]\n", tokenTypeToString(t.Type), t.Literal)
+	fmt.Printf("[type: %s, literal: %s]\n", TokenTypeToString(t.Type), t.Literal)
 }
 
 type Token struct {

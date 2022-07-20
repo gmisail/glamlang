@@ -1,4 +1,4 @@
-package main
+package lexer
 
 import (
 	"fmt"
@@ -31,6 +31,8 @@ var keywords = map[string]TokenType{
 	"true":   TRUE,
 	"false":  FALSE,
 	"fun":    FUNCTION,
+	"and":    AND,
+	"or":     OR,
 	"struct": STRUCT,
 }
 

@@ -23,7 +23,7 @@ if age >= 21 {
 
 let can_drink : bool = age >= 21
 
-if name == "graham" {
+if name == "graham" and age == 10 {
 
 } else {
 
@@ -46,6 +46,11 @@ let mult : (int, int) -> int = fun(x, y) => x * y
 
 struct Album {
     name: string,
-    artist: string,
-    award: album
+    artist: string
 }
+
+let is_artist: (string, Album) -> bool = fun(artist, album) => {
+    artist
+}
+
+is_artist("hello", 123, true, nested_function("value"))
