@@ -54,3 +54,11 @@ let is_artist: (string, Album) -> bool = fun(artist, album) => {
 }
 
 is_artist("hello", 123, true, nested_function("value"))
+
+let identity: ((string) -> string) -> (string) -> string = fun(callback) => {
+	callback	
+}
+
+identity(fun(val) => {
+	print(val)
+})()

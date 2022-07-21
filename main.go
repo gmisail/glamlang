@@ -19,8 +19,6 @@ func main() {
 	statements := parser.Parse(l.Tokens)
 
 	for _, s := range statements {
-		//fmt.Println(reflect.TypeOf(s))
-
 		fmt.Println(s.String())
 	}
 
