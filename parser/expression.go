@@ -1,21 +1,29 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
 )
 
 func (p *Parser) parsePrimary() (ast.Expression, error) {
 	if p.MatchToken(lexer.FALSE) {
-		return &ast.Literal{Value: false}, nil
+		return &ast.Literal{Value: false, Type: ast.BOOLEAN}, nil
 	} else if p.MatchToken(lexer.TRUE) {
-		return &ast.Literal{Value: true}, nil
+		return &ast.Literal{Value: true, Type: ast.BOOLEAN}, nil
 	} else if p.MatchToken(lexer.NULL) {
-		return &ast.Literal{Value: nil}, nil
+		return &ast.Literal{Value: nil, Type: ast.NULL}, nil
 	} else if p.MatchToken(lexer.STRING, lexer.INT, lexer.FLOAT) {
-		return &ast.Literal{Value: p.PreviousToken().Literal}, nil
+		literalType := ast.STRING
+		previousType := p.PreviousToken().Type
+
+		switch previousType {
+		case lexer.INT:
+			literalType = ast.INTEGER
+		case lexer.FLOAT:
+			literalType = ast.FLOAT
+		}
+
+		return &ast.Literal{Value: p.PreviousToken().Literal, Type: literalType}, nil
 	} else if p.MatchToken(lexer.IDENTIFIER) {
 		return &ast.VariableExpression{Value: p.PreviousToken().Literal}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
@@ -38,8 +46,6 @@ func (p *Parser) finishParseCall(callee ast.Expression) ast.Expression {
 	for p.CurrentToken().Type != lexer.R_PAREN {
 		argument, _ := p.parseExpression()
 		arguments = append(arguments, argument)
-
-		fmt.Println(argument.String())
 
 		p.Consume(lexer.COMMA, "Expected comma.")
 	}

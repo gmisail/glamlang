@@ -1,24 +1,60 @@
 package typechecker
 
-type Type interface { }
+import "github.com/gmisail/glamlang/ast"
 
-type TypeInt struct {
-	Type
+type Type struct {
+	Name       string
+	IsOptional bool
 }
 
-type TypeFloat struct {
-	Type
+func CreateType(name string, isOptional bool) *Type {
+	return &Type{Name: name, IsOptional: isOptional}
 }
 
-type TypeString struct {
-	Type
+func CreateTypeFrom(typeDefinition ast.TypeDefinition) *Type {
+	switch targetType := typeDefinition.(type) {
+	case *ast.VariableType:
+		return CreateType(targetType.Base, targetType.Optional)
+	case *ast.FunctionType:
+		return nil // TODO: figure out how to represent function types
+	}
+
+	return nil
 }
 
-type TypeBool struct {
-	Type
+func (t *Type) Equals(otherType *Type) bool {
+	/*
+		int == int 	 	   (yes)
+		bool == bool 	   (yes)
+		int == int?  	   (no)
+		string? == string? (yes)
+		(int, int) -> int == (int, float) -> int (no)
+		(int, int) -> int == (int, int) -> int   (yes)
+	*/
+	if t.Name != otherType.Name || t.IsOptional != otherType.IsOptional {
+		return false
+	}
+
+	return true
 }
 
-type TypeVariable struct {
-	Type
-	Value Type
+func IsInternalType(target ast.TypeDefinition) (bool, *Type) {
+	if targetType, ok := target.(*ast.VariableType); ok {
+		isOptional := targetType.Optional
+
+		switch targetType.Base {
+		case "int":
+			return true, CreateType("int", isOptional)
+		case "float":
+			return true, CreateType("float", isOptional)
+		case "bool":
+			return true, CreateType("bool", isOptional)
+		default:
+			return false, nil
+		}
+	}
+
+	// functions?
+
+	return false, nil
 }

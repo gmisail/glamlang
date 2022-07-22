@@ -208,9 +208,21 @@ func (f *FunctionCall) String() string {
 	return builder.String()
 }
 
+type LiteralType int64
+
+const (
+	INTEGER LiteralType = iota
+	FLOAT
+	STRING
+	BOOLEAN
+	NULL
+)
+
 type Literal struct {
 	Expression
+
 	Value interface{}
+	Type  LiteralType
 }
 
 func (l *Literal) String() string {

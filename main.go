@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/gmisail/glamlang/lexer"
 	"github.com/gmisail/glamlang/parser"
-	"os"
+	"github.com/gmisail/glamlang/typechecker"
 )
 
 func main() {
@@ -17,10 +19,15 @@ func main() {
 	l := lexer.ScanTokens(string(fileData))
 
 	statements := parser.Parse(l.Tokens)
+	checker := typechecker.CreateTypeChecker()
 
 	for _, s := range statements {
-		fmt.Println(s.String())
-	}
+		ok := checker.CheckStatement(s)
 
-	fmt.Println(len(statements))
+		if ok {
+			fmt.Printf("VALID: %s\n", s.String())
+		} else {
+			fmt.Printf("INVALID: %s\n", s.String())
+		}
+	}
 }
