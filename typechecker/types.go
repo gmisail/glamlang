@@ -1,6 +1,9 @@
 package typechecker
 
-import "github.com/gmisail/glamlang/ast"
+import (
+	"github.com/gmisail/glamlang/ast"
+	"github.com/gmisail/glamlang/lexer"
+)
 
 type Type struct {
 	Name       string
@@ -9,6 +12,21 @@ type Type struct {
 
 func CreateType(name string, isOptional bool) *Type {
 	return &Type{Name: name, IsOptional: isOptional}
+}
+
+func CreateTypeFromLiteral(literalType lexer.TokenType) *Type {
+	switch literalType {
+	case lexer.INT:
+		return CreateType("int", false)
+	case lexer.FLOAT:
+		return CreateType("float", false)
+	case lexer.BOOL:
+		return CreateType("bool", false)
+	case lexer.STRING:
+		return CreateType("string", false)
+	}
+
+	return CreateType("null", false)
 }
 
 func CreateTypeFrom(typeDefinition ast.TypeDefinition) *Type {

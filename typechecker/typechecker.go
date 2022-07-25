@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gmisail/glamlang/ast"
+
+	"github.com/fatih/color"
 )
 
 type TypeChecker struct {
@@ -11,7 +13,7 @@ type TypeChecker struct {
 }
 
 func CreateTypeChecker() *TypeChecker {
-	return &TypeChecker{context: CreateGlobal()}
+	return &TypeChecker{context: CreateContext()}
 }
 
 /*
@@ -23,7 +25,7 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) bool {
 		return tc.checkVariableDeclaration(statementType)
 	}
 
-	fmt.Println("Failed to type check unknown statement.")
+	color.Green(fmt.Sprintf("Failed to type check unknown statement.\n"))
 
 	// if the switch fails, then this is an unknown statement.
 	return false
@@ -36,9 +38,17 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) bool {
 func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, *Type) {
 	switch exprType := expr.(type) {
 	case *ast.Literal:
-		return true, CreateType("int", false) // literals always check successfully
-	default:
-		fmt.Println(exprType)
+		return true, CreateTypeFromLiteral(exprType.Type) // literals always check successfully default:
+	case *ast.VariableExpression:
+		targetExists, targetType := tc.context.Find(exprType.Value)
+
+		if !targetExists {
+			color.Red(fmt.Sprintf("[type] Can't find variable %s.\n", exprType.Value))
+
+			return false, nil
+		}
+
+		return true, targetType
 	}
 
 	return false, nil
@@ -56,7 +66,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 
 	if !isValidVariable {
 		// TODO: more graceful error handling
-		fmt.Printf("[type] Variable %s already in scope.\n", v.Name)
+		color.Red(fmt.Sprintf("[type] Variable %s already in scope.\n", v.Name))
 
 		return false
 	}
@@ -64,7 +74,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	validType, valueType := tc.CheckExpression(v.Value)
 
 	if !validType {
-		fmt.Printf("[type] Invalid type in variable declaration. Got %s but expected %s.\n", valueType, variableType)
+		color.Red(fmt.Sprintf("[type] Invalid type in variable declaration. Got %s but expected %s.\n", valueType, variableType))
 
 		return false
 	}

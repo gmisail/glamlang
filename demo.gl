@@ -7,6 +7,10 @@ let age : int
 let g : bool
 let e : string
 
+let TEST : float = PI
+
+let ANOTHER_TEST : string = NONEXISTENT
+
 let name : string = "graham misail"
 let middle_name : string?
 

@@ -7,23 +7,15 @@ import (
 
 func (p *Parser) parsePrimary() (ast.Expression, error) {
 	if p.MatchToken(lexer.FALSE) {
-		return &ast.Literal{Value: false, Type: ast.BOOLEAN}, nil
+		return &ast.Literal{Value: false, Type: lexer.BOOL}, nil
 	} else if p.MatchToken(lexer.TRUE) {
-		return &ast.Literal{Value: true, Type: ast.BOOLEAN}, nil
+		return &ast.Literal{Value: true, Type: lexer.BOOL}, nil
 	} else if p.MatchToken(lexer.NULL) {
-		return &ast.Literal{Value: nil, Type: ast.NULL}, nil
+		return &ast.Literal{Value: nil, Type: lexer.NULL}, nil
 	} else if p.MatchToken(lexer.STRING, lexer.INT, lexer.FLOAT) {
-		literalType := ast.STRING
-		previousType := p.PreviousToken().Type
+		previousToken := p.PreviousToken()
 
-		switch previousType {
-		case lexer.INT:
-			literalType = ast.INTEGER
-		case lexer.FLOAT:
-			literalType = ast.FLOAT
-		}
-
-		return &ast.Literal{Value: p.PreviousToken().Literal, Type: literalType}, nil
+		return &ast.Literal{Value: previousToken.Literal, Type: previousToken.Type}, nil
 	} else if p.MatchToken(lexer.IDENTIFIER) {
 		return &ast.VariableExpression{Value: p.PreviousToken().Literal}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
