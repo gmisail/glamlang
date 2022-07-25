@@ -3,6 +3,8 @@ let y : bool = false
 let z : string = "hello world"
 let PI : float = 3.14
 
+let is_pi_greater bool = PI < 0.32
+
 let age : int
 let g : bool
 let e : string
@@ -15,6 +17,11 @@ let name : string = "graham misail"
 let middle_name : string?
 
 let map : (list, (element) -> element) -> list
+
+{
+	let i : int = 10000
+	let j : float = 10.0
+}
 
 {
     let test : int = 100

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gmisail/glamlang/ast"
+	"github.com/gmisail/glamlang/lexer"
 
 	"github.com/fatih/color"
 )
@@ -20,12 +21,26 @@ func CreateTypeChecker() *TypeChecker {
 	Returns true if the statement could be type checked successfully.
 */
 func (tc *TypeChecker) CheckStatement(statement ast.Statement) bool {
-	switch statementType := statement.(type) {
+	switch targetStatement := statement.(type) {
+	case *ast.ExpressionStatement:
+		isValid, _ := tc.CheckExpression(targetStatement)
+		return isValid
 	case *ast.VariableDeclaration:
-		return tc.checkVariableDeclaration(statementType)
+		return tc.checkVariableDeclaration(targetStatement)
+	case *ast.BlockStatement:
+		// check every statement within a block
+		for _, innerStatement := range targetStatement.Statements {
+			if !tc.CheckStatement(innerStatement) {
+				color.Green("failed on statement: %s", innerStatement.String())
+
+				return false
+			}
+		}
+
+		return true
 	}
 
-	color.Green(fmt.Sprintf("Failed to type check unknown statement.\n"))
+	color.Green(fmt.Sprintf("Failed to type check unknown statement: %T\n", statement))
 
 	// if the switch fails, then this is an unknown statement.
 	return false
@@ -38,7 +53,7 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) bool {
 func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, *Type) {
 	switch exprType := expr.(type) {
 	case *ast.Literal:
-		return true, CreateTypeFromLiteral(exprType.Type) // literals always check successfully default:
+		return true, CreateTypeFromLiteral(exprType.Type) // literals always check successfully
 	case *ast.VariableExpression:
 		targetExists, targetType := tc.context.Find(exprType.Value)
 
@@ -49,6 +64,10 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, *Type) {
 		}
 
 		return true, targetType
+	case *ast.Group:
+		return tc.CheckExpression(exprType.Value)
+	case *ast.Binary:
+		return true, CreateTypeFromLiteral(lexer.BOOL)
 	}
 
 	return false, nil
@@ -82,4 +101,26 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	isEqual := variableType.Equals(valueType)
 
 	return isEqual
+}
+
+func (tc *TypeChecker) checkBinary(expression *ast.Binary) bool {
+		isLeftValid, leftType := tc.CheckExpression(expression.Left)
+		isRightValid, rightType := tc.CheckExpression(expression.Right)
+
+		if !isLeftValid || !isRightValid {
+			color.Red("[type] l-value or r-value failed type checking.")
+
+			return false
+		}
+
+		isMatching := leftType.Equals(rightType)
+
+		if !isMatching {
+			color.Red("[type] types do not match.")
+			return false
+		}
+
+		// regardless of the types that we're comparing, a logical
+		// statement will always return a boolean.
+		return true, CreateTypeFromLiteral(lexer.BOOL)
 }
