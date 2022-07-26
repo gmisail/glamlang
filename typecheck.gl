@@ -1,0 +1,28 @@
+let x : int = 100
+let y : bool = false
+let z : string = "hello world"
+let PI : float = 3.14
+
+let E : float = true
+
+let is_pi_greater : bool = PI < 0.32
+let invalid_comp : bool = PI * 10
+let valid_comp : float = PI * 10.0
+
+let advanced_comp : bool = ((10.0 != 5.0) == ((PI > 4.0) != false))
+
+if is_pi_greater {
+	
+}
+
+if valid_comp {
+
+}
+
+while is_pi_greater != false {
+
+}
+
+while valid_comp {
+
+}

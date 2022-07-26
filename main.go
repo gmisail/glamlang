@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	fileData, err := os.ReadFile("./demo.gl")
+	fileData, err := os.ReadFile("./typecheck.gl")
 
 	if err != nil {
 		panic(err)

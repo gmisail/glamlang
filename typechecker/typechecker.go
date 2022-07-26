@@ -38,12 +38,69 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) bool {
 		}
 
 		return true
+	case *ast.IfStatement:
+		return tc.checkIfStatement(targetStatement)
+	case *ast.WhileStatement:
+		return tc.checkWhileStatement(targetStatement)
 	}
 
 	color.Green(fmt.Sprintf("Failed to type check unknown statement: %T\n", statement))
 
 	// if the switch fails, then this is an unknown statement.
 	return false
+}
+
+/*
+	Check if the condition of an if statement is a boolean, and that
+	its body type checks properly.
+*/
+func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) bool {
+	isValidType, conditionType := tc.CheckExpression(stat.Condition)
+
+	if !isValidType {
+		return false
+	}
+
+	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
+		color.Red("[type] Expected condition in 'if' statement to be boolean, got %s.", conditionType.Name)
+
+		return false
+	}
+
+	if !tc.CheckStatement(stat.Body) {
+		return false
+	}
+
+	if stat.ElseBody != nil {
+		if !tc.CheckStatement(stat.ElseBody) {
+			return false
+		}
+	}
+
+	return true
+}
+
+/*
+	Check if the condition is a boolean and that the body type checks properly.
+*/
+func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) bool {
+	isValidType, conditionType := tc.CheckExpression(stat.Condition)
+
+	if !isValidType {
+		return false
+	}
+
+	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
+		color.Red("[type] Expected condition in 'while' statement to be boolean, got %s.", conditionType.Name)
+
+		return false
+	}
+
+	if !tc.CheckStatement(stat.Body) {
+		return false
+	}
+
+	return true
 }
 
 /*
@@ -67,7 +124,13 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, *Type) {
 	case *ast.Group:
 		return tc.CheckExpression(exprType.Value)
 	case *ast.Binary:
-		return true, CreateTypeFromLiteral(lexer.BOOL)
+		targetExists, targetType := tc.checkBinary(exprType)
+
+		if !targetExists {
+			return false, nil
+		}
+
+		return true, targetType
 	}
 
 	return false, nil
@@ -93,34 +156,55 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	validType, valueType := tc.CheckExpression(v.Value)
 
 	if !validType {
-		color.Red(fmt.Sprintf("[type] Invalid type in variable declaration. Got %s but expected %s.\n", valueType, variableType))
+		color.Red("[type] error in nested expression")
 
 		return false
 	}
 
 	isEqual := variableType.Equals(valueType)
 
+	if !isEqual {
+		color.Red("[type] Invalid type in variable declaration. Expected %s but got %s.\n", valueType.Name, variableType.Name)
+
+		return false
+	}
+
 	return isEqual
 }
 
-func (tc *TypeChecker) checkBinary(expression *ast.Binary) bool {
-		isLeftValid, leftType := tc.CheckExpression(expression.Left)
-		isRightValid, rightType := tc.CheckExpression(expression.Right)
+func (tc *TypeChecker) checkBinary(expression *ast.Binary) (bool, *Type) {
+	isLeftValid, leftType := tc.CheckExpression(expression.Left)
+	isRightValid, rightType := tc.CheckExpression(expression.Right)
 
-		if !isLeftValid || !isRightValid {
-			color.Red("[type] l-value or r-value failed type checking.")
+	if !isLeftValid || !isRightValid {
+		color.Red("[type] l-value or r-value failed type checking.")
 
-			return false
-		}
+		return false, nil
+	}
 
-		isMatching := leftType.Equals(rightType)
+	isEqual := leftType.Equals(rightType)
 
-		if !isMatching {
-			color.Red("[type] types do not match.")
-			return false
-		}
+	if !isEqual {
+		color.Red(
+			"[type] Types do not match in binary expression. Left type is %s while the right type is %s.",
+			leftType.Name,
+			rightType.Name,
+		)
 
-		// regardless of the types that we're comparing, a logical
-		// statement will always return a boolean.
+		return false, nil
+	}
+
+	switch expression.Operator {
+	case lexer.LT,
+		lexer.LT_EQ,
+		lexer.GT,
+		lexer.GT_EQ,
+		lexer.EQUALITY,
+		lexer.NOT_EQUAL:
 		return true, CreateTypeFromLiteral(lexer.BOOL)
+	case lexer.ADD, lexer.SUB, lexer.MULT, lexer.DIV:
+		return true, leftType
+	}
+
+	return true, nil
 }

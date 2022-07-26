@@ -3,7 +3,8 @@ let y : bool = false
 let z : string = "hello world"
 let PI : float = 3.14
 
-let is_pi_greater bool = PI < 0.32
+let is_pi_greater : bool = PI < 0.32
+let invalid_comp : bool = PI * 10
 
 let age : int
 let g : bool
