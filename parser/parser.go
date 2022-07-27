@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 
+	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
 )
@@ -68,10 +69,18 @@ func (p *Parser) MatchToken(types ...lexer.TokenType) bool {
 	return false
 }
 
-func (p *Parser) Check(tokenType lexer.TokenType) bool {
+func (p *Parser) Check(types ...lexer.TokenType) bool {
 	next := p.PeekToken()
+	isNext := false
 
-	return next != nil && next.Type == tokenType
+	for _, token := range types {
+		if next.Type == token {
+			isNext = true
+			break
+		}
+	}
+
+	return next != nil && isNext
 }
 
 func (p *Parser) Consume(tokenType lexer.TokenType, message string) (*lexer.Token, error) {
@@ -88,6 +97,12 @@ func (p *Parser) Consume(tokenType lexer.TokenType, message string) (*lexer.Toke
 	return p.PreviousToken(), nil
 }
 
+func (p *Parser) Calibrate() {
+	for p.PeekToken() != nil && !p.Check(lexer.WHILE, lexer.IF, lexer.WHILE, lexer.LET, lexer.STRUCT, lexer.L_BRACE) {
+		p.AdvanceToken()
+	}
+}
+
 func Parse(tokens []lexer.Token) []ast.Statement {
 	parser := &Parser{current: 0, Tokens: tokens}
 
@@ -101,9 +116,10 @@ func Parse(tokens []lexer.Token) []ast.Statement {
 			break
 		} else if statement == nil && err != nil {
 			// handle error
+			color.Red(err.Error())
+			parser.Calibrate()
 
-			// skip tokens until we find another statement to parse
-			// if not, break
+			continue
 		}
 
 		statements = append(statements, statement)

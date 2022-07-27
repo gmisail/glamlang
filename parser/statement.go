@@ -12,32 +12,72 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 		let <name> : <type> (= <expression>)?
 	*/
 
-	name, _ := p.Consume(lexer.IDENTIFIER, "Expected variable name.")
+	name, nameErr := p.Consume(lexer.IDENTIFIER, "Expected variable name.")
 
-	p.Consume(lexer.COLON, "Expected ':' after variable name in declaration.")
+	if nameErr != nil {
+		return nil, nameErr
+	}
 
-	variableType, _ := p.parseTypeDeclaration()
+	_, colonErr := p.Consume(lexer.COLON, "Expected ':' after variable name in declaration.")
+
+	if colonErr != nil {
+		return nil, colonErr
+	}
+
+	variableType, typeErr := p.parseTypeDeclaration()
+
+	if typeErr != nil {
+		return nil, typeErr
+	}
 
 	var value ast.Expression = nil
+	var exprErr error = nil
+
 	if p.MatchToken(lexer.EQUAL) {
-		value, _ = p.parseExpression()
+		value, exprErr = p.parseExpression()
+
+		if exprErr != nil {
+			return nil, exprErr
+		}
 	}
 
 	return &ast.VariableDeclaration{Name: name.Literal, Type: variableType, Value: value}, nil
 }
 
 func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
-	identifier, _ := p.Consume(lexer.IDENTIFIER, "Expected name after struct definition.")
+	identifier, identifierErr := p.Consume(lexer.IDENTIFIER, "Expected name after struct definition.")
+
+	if identifierErr != nil {
+		return nil, identifierErr
+	}
+
 	variables := make([]ast.VariableDeclaration, 0)
 
-	p.Consume(lexer.L_BRACE, "Expected '{' when declaring struct.")
+	_, leftBraceErr := p.Consume(lexer.L_BRACE, "Expected '{' when declaring struct.")
+
+	if leftBraceErr != nil {
+		return nil, leftBraceErr
+	}
 
 	for {
-		variableName, _ := p.Consume(lexer.IDENTIFIER, "Expected variable name")
+		variableName, variableErr := p.Consume(lexer.IDENTIFIER, "Expected variable name")
 
-		p.Consume(lexer.COLON, "Expected ':' after variable name.")
+		if variableErr != nil {
+			return nil, variableErr
+		}
 
-		variableType, _ := p.parseTypeDeclaration()
+		_, colonErr := p.Consume(lexer.COLON, "Expected ':' after variable name.")
+
+		if colonErr != nil {
+			return nil, colonErr
+		}
+
+		variableType, variableTypeErr := p.parseTypeDeclaration()
+
+		if variableTypeErr != nil {
+			return nil, variableTypeErr
+		}
+
 		variables = append(variables, ast.VariableDeclaration{Name: variableName.Literal, Type: variableType, Value: nil})
 
 		if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
@@ -61,39 +101,70 @@ func (p *Parser) parseBlockStatement() (ast.Statement, error) {
 
 	// TODO: make function for "check"
 	for p.CurrentToken().Type != lexer.R_BRACE /*&& is not at end */ {
-		statement, _ := p.parseDeclaration()
+		statement, statementErr := p.parseDeclaration()
 
 		if statement == nil {
 			break
 		}
 
-		// TODO: handle error
+		if statementErr != nil {
+			return nil, statementErr
+		}
 
 		statements = append(statements, statement)
 	}
 
-	p.Consume(lexer.R_BRACE, "Expected '}' after block")
+	_, rightBraceErr := p.Consume(lexer.R_BRACE, "Expected '}' after block")
+
+	if rightBraceErr != nil {
+		return nil, rightBraceErr
+	}
 
 	return &ast.BlockStatement{Statements: statements}, nil
 }
 
 func (p *Parser) parseIfStatement() (ast.Statement, error) {
-	condition, _ := p.parseExpression()
-	ifBranch, _ := p.parseStatement()
+	condition, conditionErr := p.parseExpression()
+	
+	if conditionErr != nil {
+		return nil, conditionErr
+	}
+
+	ifBranch, ifBranchErr := p.parseStatement()
+
+	if ifBranchErr != nil {
+		return nil, ifBranchErr
+	}
 
 	var elseBranch ast.Statement = nil
 
 	if p.MatchToken(lexer.ELSE) {
-		elseBranchStatement, _ := p.parseStatement()
+		elseBranchStatement, elseBranchStatementErr := p.parseStatement()
+
+		if elseBranchStatementErr != nil {
+			return nil, elseBranchStatementErr
+		}
+
 		elseBranch = elseBranchStatement
 	}
 
 	return &ast.IfStatement{Condition: condition, Body: ifBranch, ElseBody: elseBranch}, nil
 }
 
+// HERE SO FAR
+
 func (p *Parser) parseWhileStatement() (ast.Statement, error) {
-	condition, _ := p.parseExpression()
-	body, _ := p.parseStatement()
+	condition, conditionErr := p.parseExpression()
+
+	if conditionErr != nil {
+		return nil, conditionErr
+	}
+
+	body, bodyErr := p.parseStatement()
+
+	if bodyErr != nil {
+		return nil, bodyErr
+	}
 
 	return &ast.WhileStatement{Condition: condition, Body: body}, nil
 }
@@ -101,9 +172,8 @@ func (p *Parser) parseWhileStatement() (ast.Statement, error) {
 func (p *Parser) parseExpressionStatement() (ast.Statement, error) {
 	expression, err := p.parseExpression()
 
-	// TODO: handle me
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	return &ast.ExpressionStatement{Value: expression}, err

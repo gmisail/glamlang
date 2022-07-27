@@ -31,5 +31,5 @@ struct Account {
 	balance: float
 	name: string
 	is_overdrawn: bool
-	linkedAccount: Account
+	linked_account: Account
 }
