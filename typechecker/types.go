@@ -67,6 +67,8 @@ func IsInternalType(target ast.TypeDefinition) (bool, *Type) {
 			return true, CreateType("float", isOptional)
 		case "bool":
 			return true, CreateType("bool", isOptional)
+		case "string":
+			return true, CreateType("string", isOptional)
 		default:
 			return false, nil
 		}

@@ -3,10 +3,11 @@ package typechecker
 type Environment struct {
 	Parent *Environment
 	Values map[string]*Type
+	Types  map[string]*Environment
 }
 
 func CreateEnvironment(parent *Environment) *Environment {
-	return &Environment{Parent: parent, Values: make(map[string]*Type)}
+	return &Environment{Parent: parent, Values: make(map[string]*Type), Types: make(map[string]*Environment)}
 }
 
 /*
@@ -39,4 +40,31 @@ func (e *Environment) Add(variableName string, variableType *Type) bool {
 	e.Values[variableName] = variableType
 
 	return true
+}
+
+/*
+	Returns if a custom type exists in the current context.
+*/
+func (e *Environment) CustomTypeExists(typeName string) bool {
+	if _, ok := e.Types[typeName]; ok {
+		return true
+	}
+
+	return false
+}
+
+/*
+	Adds a custom type (i.e. struct) if it does not exist already. Returns
+	true if it was added as well as an environment which represents the
+	variables within the struct.
+*/
+func (e *Environment) AddType(typeName string) (bool, *Environment) {
+	if e.CustomTypeExists(typeName) {
+		return false, nil
+	}
+
+	environment := CreateEnvironment(nil)
+	e.Types[typeName] = environment
+
+	return true, environment
 }

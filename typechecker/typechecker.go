@@ -42,6 +42,8 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) bool {
 		return tc.checkIfStatement(targetStatement)
 	case *ast.WhileStatement:
 		return tc.checkWhileStatement(targetStatement)
+	case *ast.StructDeclaration:
+		return tc.checkStructStatement(targetStatement)
 	}
 
 	color.Green(fmt.Sprintf("Failed to type check unknown statement: %T\n", statement))
@@ -98,6 +100,34 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) bool {
 
 	if !tc.CheckStatement(stat.Body) {
 		return false
+	}
+
+	return true
+}
+
+func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) bool {
+	isUnique, structEnv := tc.context.environment.AddType(stat.Name)
+
+	if !isUnique {
+		color.Red("[type] Struct '%s' already defined.", stat.Name)
+
+		return false
+	}
+
+	for _, structVariable := range stat.Variables {
+		variableName := structVariable.Name
+		variableType := CreateTypeFrom(structVariable.Type)
+
+		if !tc.context.environment.CustomTypeExists(variableType.Name) {
+			isPrimitive, _ := IsInternalType(structVariable.Type)
+
+			if !isPrimitive {
+				color.Red("[type] Type '%s' does not exist in this context.", variableType.Name)
+				return false
+			}
+		}
+
+		structEnv.Add(variableName, variableType)
 	}
 
 	return true

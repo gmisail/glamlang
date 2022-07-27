@@ -41,6 +41,7 @@ const (
 	RETURN
 	FUNCTION
 	STRUCT
+	MODULE
 	AND
 	OR
 	ARROW
@@ -122,6 +123,8 @@ func TokenTypeToString(token TokenType) string {
 		return "RETURN"
 	case STRUCT:
 		return "STRUCT"
+	case MODULE:
+		return "MODULE"
 	case AND:
 		return "AND"
 	case OR:

@@ -34,6 +34,7 @@ var keywords = map[string]TokenType{
 	"and":    AND,
 	"or":     OR,
 	"struct": STRUCT,
+	"module": MODULE,
 }
 
 func (l *LexerError) Error() string {
