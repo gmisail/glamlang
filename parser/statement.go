@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
 )
@@ -125,7 +123,7 @@ func (p *Parser) parseBlockStatement() (ast.Statement, error) {
 
 func (p *Parser) parseIfStatement() (ast.Statement, error) {
 	condition, conditionErr := p.parseExpression()
-	
+
 	if conditionErr != nil {
 		return nil, conditionErr
 	}
@@ -150,8 +148,6 @@ func (p *Parser) parseIfStatement() (ast.Statement, error) {
 
 	return &ast.IfStatement{Condition: condition, Body: ifBranch, ElseBody: elseBranch}, nil
 }
-
-// HERE SO FAR
 
 func (p *Parser) parseWhileStatement() (ast.Statement, error) {
 	condition, conditionErr := p.parseExpression()

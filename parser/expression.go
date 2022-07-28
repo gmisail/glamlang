@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"fmt"
+
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
 )
@@ -20,6 +22,7 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		return &ast.VariableExpression{Value: p.PreviousToken().Literal}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
 		expr, _ := p.parseExpression()
+
 		_, err := p.Consume(lexer.R_PAREN, "Expected closing parenthesis for group expression.")
 
 		if err != nil {
@@ -29,30 +32,50 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		return &ast.Group{Value: expr}, nil
 	}
 
-	return nil, nil
+	fmt.Println(lexer.TokenTypeToString(p.CurrentToken().Type))
+
+	return nil, &ParseError{message: fmt.Sprintf("Unexpected token: ", p.CurrentToken().Literal), line: 0}
 }
 
-func (p *Parser) finishParseCall(callee ast.Expression) ast.Expression {
+func (p *Parser) finishParseCall(callee ast.Expression) (ast.Expression, error) {
 	arguments := make([]ast.Expression, 0)
 
 	for p.CurrentToken().Type != lexer.R_PAREN {
 		argument, _ := p.parseExpression()
 		arguments = append(arguments, argument)
 
-		p.Consume(lexer.COMMA, "Expected comma.")
+		_, commaErr := p.Consume(lexer.COMMA, "Expected comma after arguments in function call.")
+
+		if commaErr != nil {
+			return nil, commaErr
+		}
 	}
 
-	p.Consume(lexer.R_PAREN, "Expected ')' after arguments.")
+	_, rightParenErr := p.Consume(lexer.R_PAREN, "Expected ')' after function call arguments.")
 
-	return &ast.FunctionCall{Callee: callee, Arguments: arguments}
+	if rightParenErr != nil {
+		return nil, rightParenErr
+	}
+
+	return &ast.FunctionCall{Callee: callee, Arguments: arguments}, nil
 }
 
 func (p *Parser) parseCall() (ast.Expression, error) {
-	expr, _ := p.parsePrimary()
+	expr, primaryErr := p.parsePrimary()
+
+	if primaryErr != nil {
+		return nil, primaryErr
+	}
+
+	var callErr error = nil
 
 	for {
 		if p.MatchToken(lexer.L_PAREN) {
-			expr = p.finishParseCall(expr)
+			expr, callErr = p.finishParseCall(expr)
+
+			if callErr != nil {
+				return nil, callErr
+			}
 		} else {
 			break
 		}
@@ -65,12 +88,21 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 	if p.MatchToken(lexer.FUNCTION) {
 		parameters := make([]string, 0)
 
-		p.Consume(lexer.L_PAREN, "Expected '('")
+		_, leftParenErr := p.Consume(lexer.L_PAREN, "Expected '('")
+
+		if leftParenErr != nil {
+			return nil, leftParenErr
+		}
 
 		// if there's a right parenthesis, that means the function doesn't have any parameters.
 		if !p.MatchToken(lexer.R_PAREN) {
 			for {
-				parameter, _ := p.Consume(lexer.IDENTIFIER, "Expected parameter name.")
+				parameter, parameterErr := p.Consume(lexer.IDENTIFIER, "Expected parameter name.")
+
+				if parameterErr != nil {
+					return nil, parameterErr
+				}
+
 				parameters = append(parameters, parameter.Literal)
 
 				// no more parameters :(
@@ -80,9 +112,17 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 			}
 		}
 
-		p.Consume(lexer.THICK_ARROW, "Expected '=>' after parameter defintion.")
+		_, thickArrowErr := p.Consume(lexer.THICK_ARROW, "Expected '=>' after parameter defintion.")
 
-		body, _ := p.parseStatement()
+		if thickArrowErr != nil {
+			return nil, thickArrowErr
+		}
+
+		body, statErr := p.parseStatement()
+
+		if statErr != nil {
+			return nil, statErr
+		}
 
 		return &ast.FunctionExpression{Parameters: parameters, Body: body}, nil
 	}
