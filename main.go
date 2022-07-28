@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/lexer"
@@ -17,12 +18,18 @@ func main() {
 		panic(err)
 	}
 
+	start := time.Now()
 	l := lexer.ScanTokens(string(fileData))
+	color.Blue("[glam] Done lexing in %s.", time.Since(start))
 
-	color.Blue("[glam] Done lexing.")
-	statements := parser.Parse(l.Tokens)
+	start = time.Now()
+	ok, statements := parser.Parse(l.Tokens)
+	color.Blue("[glam] Done parsing in %s.", time.Since(start))
 
-	color.Blue("[glam] Done parsing.")
+	if !ok {
+		return
+	}
+
 	checker := typechecker.CreateTypeChecker()
 
 	for _, s := range statements {

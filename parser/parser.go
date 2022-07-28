@@ -105,10 +105,10 @@ func (p *Parser) Calibrate() {
 	}
 }
 
-func Parse(tokens []lexer.Token) []ast.Statement {
+func Parse(tokens []lexer.Token) (bool, []ast.Statement) {
 	parser := &Parser{current: 0, Tokens: tokens}
-
 	statements := make([]ast.Statement, 0)
+	isValid := true
 
 	for {
 		statement, err := parser.parseDeclaration()
@@ -117,7 +117,8 @@ func Parse(tokens []lexer.Token) []ast.Statement {
 		if statement == nil && err == nil {
 			break
 		} else if statement == nil && err != nil {
-			// handle error
+			isValid = false
+
 			color.Red(err.Error())
 			parser.Calibrate()
 
@@ -127,5 +128,5 @@ func Parse(tokens []lexer.Token) []ast.Statement {
 		statements = append(statements, statement)
 	}
 
-	return statements
+	return isValid, statements
 }
