@@ -1,10 +1,11 @@
 # ✨ glamlang
 
-## Build
+Glam is a experimental programming language inspired by Javascript, Haskell, and OCaml. 
 
+## Build
+Glam requires `task` for running project commands. To build, simply run:
 ```
-go build
-./glamlang
+task build
 ```
 
 ## Tests
