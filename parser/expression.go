@@ -32,9 +32,7 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		return &ast.Group{Value: expr}, nil
 	}
 
-	fmt.Println(lexer.TokenTypeToString(p.CurrentToken().Type))
-
-	return nil, &ParseError{message: fmt.Sprintf("Unexpected token: ", p.CurrentToken().Literal), line: 0}
+	return nil, &ParseError{message: fmt.Sprintf("Unexpected token: %s", lexer.TokenTypeToString(p.CurrentToken().Type)), line: p.CurrentToken().Line}
 }
 
 func (p *Parser) finishParseCall(callee ast.Expression) (ast.Expression, error) {
@@ -230,11 +228,19 @@ func (p *Parser) parseEquality() (ast.Expression, error) {
 }
 
 func (p *Parser) parseLogicalAnd() (ast.Expression, error) {
-	expr, _ := p.parseEquality()
+	expr, eqErr := p.parseEquality()
+
+	if eqErr != nil {
+		return nil, eqErr
+	}
 
 	for p.MatchToken(lexer.AND) {
 		op := p.PreviousToken()
-		right, _ := p.parseEquality()
+		right, rightErr := p.parseEquality()
+
+		if rightErr != nil {
+			return nil, rightErr
+		}
 
 		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type}
 	}
@@ -243,11 +249,19 @@ func (p *Parser) parseLogicalAnd() (ast.Expression, error) {
 }
 
 func (p *Parser) parseLogicalOr() (ast.Expression, error) {
-	expr, _ := p.parseLogicalAnd()
+	expr, andErr := p.parseLogicalAnd()
+
+	if andErr != nil {
+		return nil, andErr
+	}
 
 	for p.MatchToken(lexer.AND) {
 		op := p.PreviousToken()
-		right, _ := p.parseLogicalAnd()
+		right, rightErr := p.parseLogicalAnd()
+
+		if rightErr != nil {
+			return nil, rightErr
+		}
 
 		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type}
 	}

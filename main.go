@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/lexer"
 	"github.com/gmisail/glamlang/parser"
 	"github.com/gmisail/glamlang/typechecker"
@@ -18,7 +19,10 @@ func main() {
 
 	l := lexer.ScanTokens(string(fileData))
 
+	color.Blue("[glam] Done lexing.")
 	statements := parser.Parse(l.Tokens)
+
+	color.Blue("[glam] Done parsing.")
 	checker := typechecker.CreateTypeChecker()
 
 	for _, s := range statements {
@@ -30,4 +34,6 @@ func main() {
 			fmt.Printf("INVALID: %s\n", s.String())
 		}
 	}
+
+	color.Blue("[glam] Done type checking.")
 }

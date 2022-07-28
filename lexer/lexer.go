@@ -177,7 +177,7 @@ func (l *Lexer) SkipWhitespace() {
 }
 
 func (l *Lexer) AddToken(tokenType TokenType, literal string) Token {
-	t := Token{Type: tokenType, Literal: literal}
+	t := Token{Type: tokenType, Literal: literal, Line: l.line}
 	l.Tokens = append(l.Tokens, t)
 	return t
 }
