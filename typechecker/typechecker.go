@@ -166,6 +166,19 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, Type) {
 		}
 
 		return true, targetType
+	case *ast.Logical:
+		targetExists, targetType := tc.checkLogical(exprType)
+
+		if !targetExists {
+			return false, nil
+		}
+
+		return true, targetType
+		/*
+			- UNARY
+			- LOGICAL
+			- FUNCTION CALL
+		*/
 	}
 
 	return false, nil
@@ -241,4 +254,23 @@ func (tc *TypeChecker) checkBinary(expression *ast.Binary) (bool, Type) {
 	}
 
 	return true, nil
+}
+
+func (tc *TypeChecker) checkLogical(expr *ast.Logical) (bool, Type) {
+	isLeftValid, leftType := tc.CheckExpression(expr.Left)
+	isRightValid, rightType := tc.CheckExpression(expr.Right)
+
+	if !isLeftValid || !isRightValid {
+		color.Red("[type] l-value or r-value failed type checking.")
+
+		return false, nil
+	}
+
+	boolType := CreateTypeFromLiteral(lexer.BOOL)
+
+	if !(leftType.Equals(boolType) && rightType.Equals(boolType)) {
+		return false, nil
+	}
+
+	return true, boolType
 }

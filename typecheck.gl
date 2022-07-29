@@ -11,6 +11,10 @@ let valid_comp : float = PI * 10.0
 
 let advanced_comp : bool = ((10.0 != 5.0) == ((PI > 4.0) != false))
 
+while PI < 0.1 and PI > 4.0 {
+
+}
+
 if E != true {
 	
 }
