@@ -64,7 +64,7 @@ func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) bool {
 	}
 
 	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
-		color.Red("[type] Expected condition in 'if' statement to be boolean, got %s.", conditionType.Name)
+		color.Red("[type] Expected condition in 'if' statement to be boolean, got %s.", conditionType.String())
 
 		return false
 	}
@@ -93,7 +93,7 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) bool {
 	}
 
 	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
-		color.Red("[type] Expected condition in 'while' statement to be boolean, got %s.", conditionType.Name)
+		color.Red("[type] Expected condition in 'while' statement to be boolean, got %s.", conditionType.String())
 
 		return false
 	}
@@ -109,7 +109,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) bool {
 	isUnique, structEnv := tc.context.environment.AddType(stat.Name)
 
 	if !isUnique {
-		color.Red("[type] Struct '%s' already defined.", stat.Name)
+		color.Red("[type] Struct '%s' already defined.", stat.String())
 
 		return false
 	}
@@ -118,16 +118,21 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) bool {
 		variableName := structVariable.Name
 		variableType := CreateTypeFrom(structVariable.Type)
 
-		if !tc.context.environment.CustomTypeExists(variableType.Name) {
-			isPrimitive, _ := IsInternalType(structVariable.Type)
+		switch innerType := variableType.(type) {
+		case *VariableType:
+			if !tc.context.environment.CustomTypeExists(innerType.Name) {
+				isPrimitive, _ := IsInternalType(structVariable.Type)
 
-			if !isPrimitive {
-				color.Red("[type] Type '%s' does not exist in this context.", variableType.Name)
-				return false
+				if !isPrimitive {
+					color.Red("[type] Type '%s' does not exist in this context.", variableType.String())
+					return false
+				}
 			}
+		case *FunctionType:
+			continue
 		}
 
-		structEnv.Add(variableName, variableType)
+		structEnv.Add(variableName, &variableType)
 	}
 
 	return true
@@ -137,7 +142,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) bool {
 	Checks the type of the expression and, if valid, returns true and its type. If there
 	was an error while type checking, it will return false, nil.
 */
-func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, *Type) {
+func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, Type) {
 	switch exprType := expr.(type) {
 	case *ast.Literal:
 		return true, CreateTypeFromLiteral(exprType.Type) // literals always check successfully
@@ -145,12 +150,12 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, *Type) {
 		targetExists, targetType := tc.context.Find(exprType.Value)
 
 		if !targetExists {
-			color.Red(fmt.Sprintf("[type] Can't find variable %s.\n", exprType.Value))
+			color.Red(fmt.Sprintf("[type] Can't find variable %s.\n", exprType.String()))
 
 			return false, nil
 		}
 
-		return true, targetType
+		return true, *targetType
 	case *ast.Group:
 		return tc.CheckExpression(exprType.Value)
 	case *ast.Binary:
@@ -174,11 +179,10 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 		equal to the r-value type.
 	*/
 	variableType := CreateTypeFrom(v.Type)
-	isValidVariable := tc.context.Add(v.Name, variableType)
+	isValidVariable := tc.context.Add(v.Name, &variableType)
 
 	if !isValidVariable {
-		// TODO: more graceful error handling
-		color.Red(fmt.Sprintf("[type] Variable %s already in scope.\n", v.Name))
+		color.Red(fmt.Sprintf("[type] Variable %s already in scope.\n", v.String()))
 
 		return false
 	}
@@ -194,7 +198,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	isEqual := variableType.Equals(valueType)
 
 	if !isEqual {
-		color.Red("[type] Invalid type in variable declaration. Expected %s but got %s.\n", valueType.Name, variableType.Name)
+		color.Red("[type] Invalid type in variable declaration. Expected %s but got %s.\n", valueType.String(), variableType.String())
 
 		return false
 	}
@@ -202,7 +206,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	return isEqual
 }
 
-func (tc *TypeChecker) checkBinary(expression *ast.Binary) (bool, *Type) {
+func (tc *TypeChecker) checkBinary(expression *ast.Binary) (bool, Type) {
 	isLeftValid, leftType := tc.CheckExpression(expression.Left)
 	isRightValid, rightType := tc.CheckExpression(expression.Right)
 
@@ -217,8 +221,8 @@ func (tc *TypeChecker) checkBinary(expression *ast.Binary) (bool, *Type) {
 	if !isEqual {
 		color.Red(
 			"[type] Types do not match in binary expression. Left type is %s while the right type is %s.",
-			leftType.Name,
-			rightType.Name,
+			leftType.String(),
+			rightType.String(),
 		)
 
 		return false, nil

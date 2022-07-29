@@ -55,7 +55,6 @@ while age < 21 {
 
 let div : (int, int) -> int = fun(x, y) => x / y
 let mult : (int, int) -> int = fun(x, y) => x * y
-
 func mult(): string {
 	return (x: int, y: int) => {
 

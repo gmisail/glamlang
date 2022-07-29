@@ -11,7 +11,7 @@ let valid_comp : float = PI * 10.0
 
 let advanced_comp : bool = ((10.0 != 5.0) == ((PI > 4.0) != false))
 
-if test {
+if E != true {
 	
 }
 
@@ -40,4 +40,24 @@ struct Account {
 	name: string
 	is_overdrawn: bool
 	linked_account: Account
+}
+
+let sum : (int, int) -> int = fun(x, y) => {
+	x + y
+}
+
+let add : (int, int) -> int
+let div : (int, int) -> float
+let max : (int, int, int) -> int
+
+if sum == add {
+
+}
+
+if div == add {
+
+}
+
+if max == add {
+
 }
