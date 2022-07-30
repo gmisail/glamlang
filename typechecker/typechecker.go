@@ -23,19 +23,25 @@ func CreateTypeChecker() *TypeChecker {
 func (tc *TypeChecker) CheckStatement(statement ast.Statement) bool {
 	switch targetStatement := statement.(type) {
 	case *ast.ExpressionStatement:
-		isValid, _ := tc.CheckExpression(targetStatement)
+		isValid, _ := tc.CheckExpression(targetStatement.Value)
+
 		return isValid
 	case *ast.VariableDeclaration:
 		return tc.checkVariableDeclaration(targetStatement)
 	case *ast.BlockStatement:
+		tc.context.EnterScope()
 		// check every statement within a block
 		for _, innerStatement := range targetStatement.Statements {
 			if !tc.CheckStatement(innerStatement) {
 				color.Green("failed on statement: %s", innerStatement.String())
 
+				tc.context.ExitScope()
+
 				return false
 			}
 		}
+
+		tc.context.ExitScope()
 
 		return true
 	case *ast.IfStatement:
@@ -156,6 +162,33 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, Type) {
 		}
 
 		return true, *targetType
+	case *ast.FunctionExpression:
+		// validate that the body of the function is valid
+		tc.context.EnterScope()
+
+		parameters := make([]Type, len(exprType.Parameters))
+
+		// push the parameters into scope
+		for i, param := range exprType.Parameters {
+			paramType := CreateTypeFrom(param.Type)
+			parameters[i] = paramType
+
+			if !tc.context.Add(param.Name, &paramType) {
+				color.Red("[type] Variable '%s' already exists in this scope.", param.Name)
+			}
+		}
+
+		validBody := tc.CheckStatement(exprType.Body)
+
+		// validate that the valid being return matches the return type
+
+		tc.context.ExitScope()
+
+		if !validBody {
+			return false, nil
+		}
+
+		return true, &FunctionType{Parameters: parameters, ReturnType: CreateTypeFrom(exprType.ReturnType)}
 	case *ast.Group:
 		return tc.CheckExpression(exprType.Value)
 	case *ast.Binary:
@@ -217,7 +250,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	isEqual := variableType.Equals(valueType)
 
 	if !isEqual {
-		color.Red("[type] Invalid type in variable declaration. Expected %s but got %s.\n", valueType.String(), variableType.String())
+		color.Red("[type] Invalid type in variable declaration. Expected %s but got %s.\n", variableType.String(), valueType.String())
 
 		return false
 	}
@@ -267,8 +300,6 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (bool, Type) {
 	case lexer.BANG:
 		// !(boolean expression)
 		validType, valueType := tc.CheckExpression(expr.Value)
-
-		fmt.Println(validType, valueType)
 
 		if !validType || !valueType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
 			return false, nil

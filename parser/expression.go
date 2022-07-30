@@ -124,6 +124,18 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 			}
 		}
 
+		_, colonErr := p.Consume(lexer.COLON, "Expected ':' before function return type.")
+
+		if colonErr != nil {
+			return nil, colonErr
+		}
+
+		returnType, returnTypeErr := p.parseTypeDeclaration()
+
+		if returnTypeErr != nil {
+			return nil, returnTypeErr
+		}
+
 		_, thickArrowErr := p.Consume(lexer.THICK_ARROW, "Expected '=>' after parameter defintion.")
 
 		if thickArrowErr != nil {
@@ -136,7 +148,7 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 			return nil, statErr
 		}
 
-		return &ast.FunctionExpression{Parameters: parameters, Body: body}, nil
+		return &ast.FunctionExpression{Parameters: parameters, Body: body, ReturnType: returnType}, nil
 	}
 
 	return p.parseCall()

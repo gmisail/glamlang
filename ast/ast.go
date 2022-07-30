@@ -169,6 +169,7 @@ type FunctionExpression struct {
 	Expression
 	Parameters []VariableDeclaration
 	Body       Statement
+	ReturnType TypeDefinition
 }
 
 func (f *FunctionExpression) String() string {

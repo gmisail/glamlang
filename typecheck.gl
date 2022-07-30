@@ -52,8 +52,12 @@ struct Account {
 	linked_account: Account
 }
 
-let sum : (int, int) -> int = fun (x:int, y:int) => {
-	x + y
+let sum : (int, int) -> int = fun(bugs:int, bunny:int): int => {
+	bugs + bunny
+}
+
+let comp : (bool, int) -> bool = fun(cats: int): bool => {
+
 }
 
 let add : (int, int) -> int
