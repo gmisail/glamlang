@@ -167,7 +167,7 @@ func (g *Group) String() string {
 
 type FunctionExpression struct {
 	Expression
-	Parameters []string
+	Parameters []VariableDeclaration
 	Body       Statement
 }
 

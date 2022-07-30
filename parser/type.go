@@ -27,7 +27,12 @@ func (p *Parser) parseTypeDeclaration() (ast.TypeDefinition, error) {
 		return &ast.FunctionType{ArgumentTypes: arguments, ReturnType: returnType}, nil
 	}
 
-	name, _ := p.Consume(lexer.IDENTIFIER, "Expected type name.")
+	name, nameErr := p.Consume(lexer.IDENTIFIER, "Expected type name.")
+
+	if nameErr != nil {
+		return nil, nameErr
+	}
+
 	isOptional := p.MatchToken(lexer.QUESTION)
 
 	return &ast.VariableType{Base: name.Literal, SubType: nil, Optional: isOptional}, nil

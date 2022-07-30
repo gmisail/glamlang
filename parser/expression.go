@@ -84,7 +84,7 @@ func (p *Parser) parseCall() (ast.Expression, error) {
 
 func (p *Parser) parseFunction() (ast.Expression, error) {
 	if p.MatchToken(lexer.FUNCTION) {
-		parameters := make([]string, 0)
+		parameters := make([]ast.VariableDeclaration, 0)
 
 		_, leftParenErr := p.Consume(lexer.L_PAREN, "Expected '('")
 
@@ -101,7 +101,21 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 					return nil, parameterErr
 				}
 
-				parameters = append(parameters, parameter.Literal)
+				_, colonErr := p.Consume(lexer.COLON, "Expected ':' before type.")
+
+				if colonErr != nil {
+					return nil, colonErr
+				}
+
+				parameterType, parameterTypeErr := p.parseTypeDeclaration()
+
+				if parameterTypeErr != nil {
+					return nil, parameterTypeErr
+				}
+
+				parameters = append(parameters, ast.VariableDeclaration{
+					Name: parameter.Literal, Type: parameterType, Value: nil,
+				})
 
 				// no more parameters :(
 				if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_PAREN) {

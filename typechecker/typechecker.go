@@ -166,6 +166,14 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, Type) {
 		}
 
 		return true, targetType
+	case *ast.Unary:
+		targetExists, targetType := tc.checkUnary(exprType)
+
+		if !targetExists {
+			return false, nil
+		}
+
+		return true, targetType
 	case *ast.Logical:
 		targetExists, targetType := tc.checkLogical(exprType)
 
@@ -175,8 +183,6 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, Type) {
 
 		return true, targetType
 		/*
-			- UNARY
-			- LOGICAL
 			- FUNCTION CALL
 		*/
 	}
@@ -254,6 +260,33 @@ func (tc *TypeChecker) checkBinary(expression *ast.Binary) (bool, Type) {
 	}
 
 	return true, nil
+}
+
+func (tc *TypeChecker) checkUnary(expr *ast.Unary) (bool, Type) {
+	switch expr.Operator {
+	case lexer.BANG:
+		// !(boolean expression)
+		validType, valueType := tc.CheckExpression(expr.Value)
+
+		fmt.Println(validType, valueType)
+
+		if !validType || !valueType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
+			return false, nil
+		}
+
+		return true, valueType
+	case lexer.SUB:
+		// -(number)
+		validType, valueType := tc.CheckExpression(expr.Value)
+
+		if !validType || !valueType.Equals(CreateTypeFromLiteral(lexer.INT)) || !valueType.Equals(CreateTypeFromLiteral(lexer.FLOAT)) {
+			return false, nil
+		}
+
+		return true, valueType
+	}
+
+	return false, nil
 }
 
 func (tc *TypeChecker) checkLogical(expr *ast.Logical) (bool, Type) {
