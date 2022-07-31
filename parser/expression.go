@@ -42,10 +42,14 @@ func (p *Parser) finishParseCall(callee ast.Expression) (ast.Expression, error) 
 		argument, _ := p.parseExpression()
 		arguments = append(arguments, argument)
 
-		_, commaErr := p.Consume(lexer.COMMA, "Expected comma after arguments in function call.")
+		// if the next token is ), then there are no more arguments
+		// and we shouldn't expect to see another comma.
+		if p.CurrentToken().Type != lexer.R_PAREN {
+			_, commaErr := p.Consume(lexer.COMMA, "Expected comma after arguments in function call.")
 
-		if commaErr != nil {
-			return nil, commaErr
+			if commaErr != nil {
+				return nil, commaErr
+			}
 		}
 	}
 
@@ -74,6 +78,10 @@ func (p *Parser) parseCall() (ast.Expression, error) {
 			if callErr != nil {
 				return nil, callErr
 			}
+		} else if p.MatchToken(lexer.PERIOD) {
+			// TODO: handle me
+			name, _ := p.Consume(lexer.IDENTIFIER, "Expected identifier after '.'")
+			expr = &ast.GetExpression{Name: name.Literal, Parent: expr}
 		} else {
 			break
 		}

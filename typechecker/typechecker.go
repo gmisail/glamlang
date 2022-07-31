@@ -189,6 +189,14 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, Type) {
 		}
 
 		return true, &FunctionType{Parameters: parameters, ReturnType: CreateTypeFrom(exprType.ReturnType)}
+	case *ast.FunctionCall:
+		targetExists, targetType := tc.checkFunctionCall(exprType)
+
+		if !targetExists {
+			return false, nil
+		}
+
+		return true, targetType
 	case *ast.Group:
 		return tc.CheckExpression(exprType.Value)
 	case *ast.Binary:
@@ -215,6 +223,8 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (bool, Type) {
 		}
 
 		return true, targetType
+	case *ast.GetExpression:
+		return tc.checkGetExpression(exprType)
 		/*
 			- FUNCTION CALL
 		*/
@@ -256,6 +266,50 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	}
 
 	return isEqual
+}
+
+func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (bool, Type) {
+	isParentValid, parentType := tc.CheckExpression(expr.Parent)
+
+	if !isParentValid {
+		return false, nil
+	}
+
+	switch variableType := parentType.(type) {
+	case *VariableType:
+		typeName := variableType.Name
+		typeExists, typeMembers := tc.context.environment.GetType(typeName)
+
+		if !typeExists {
+			color.Red("[type] Cannot access member variable from a non-existent struct type.")
+
+			return false, nil
+		}
+
+		memberExists, memberType := typeMembers.Find(expr.Name)
+
+		if !memberExists {
+			color.Red(
+				"[type] Member variable '%s' does not exist on type '%s'.",
+				expr.Name,
+				typeName,
+			)
+
+			return false, nil
+		}
+
+		return true, *memberType
+	case *FunctionType:
+		color.Red("[type] Cannot access a member variable of a function type.")
+	}
+
+	return false, nil
+}
+
+func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (bool, Type) {
+	//	funcDef := tc.context.Find(...)
+
+	return false, nil
 }
 
 func (tc *TypeChecker) checkBinary(expression *ast.Binary) (bool, Type) {

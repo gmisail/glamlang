@@ -209,6 +209,16 @@ func (f *FunctionCall) String() string {
 	return builder.String()
 }
 
+type GetExpression struct {
+	Expression
+	Name   string
+	Parent Expression
+}
+
+func (g *GetExpression) String() string {
+	return fmt.Sprintf("(Get name: %s, parent: %s)", g.Name, g.Parent.String())
+}
+
 type Literal struct {
 	Expression
 

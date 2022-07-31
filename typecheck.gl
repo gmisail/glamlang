@@ -60,6 +60,10 @@ let comp : (bool, int) -> bool = fun(cats: int): bool => {
 
 }
 
+let account : Account
+account.balance
+account.fees
+
 let add : (int, int) -> int
 let div : (int, int) -> float
 let max : (int, int, int) -> int

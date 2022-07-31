@@ -68,3 +68,15 @@ func (e *Environment) AddType(typeName string) (bool, *Environment) {
 
 	return true, environment
 }
+
+func (e *Environment) GetType(typeName string) (bool, *Environment) {
+	if customType, ok := e.Types[typeName]; ok {
+		return true, customType
+	}
+
+	if e.Parent == nil {
+		return false, nil
+	}
+
+	return e.Parent.GetType(typeName)
+}
