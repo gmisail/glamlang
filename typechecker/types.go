@@ -25,6 +25,14 @@ type FunctionType struct {
 	ReturnType Type
 }
 
+var internalTypes = map[string]Type{
+	"int":    &VariableType{Name: "int", IsOptional: false},
+	"float":  &VariableType{Name: "float", IsOptional: false},
+	"string": &VariableType{Name: "string", IsOptional: false},
+	"bool":   &VariableType{Name: "bool", IsOptional: false},
+	"null":   &VariableType{Name: "null", IsOptional: false},
+}
+
 func (v *VariableType) Equals(otherType Type) bool {
 	/*
 		int == int 	 	   (yes)
@@ -103,18 +111,13 @@ func CreateFunctionType(parameters []Type, returnType Type) *FunctionType {
 }
 
 func CreateTypeFromLiteral(literalType lexer.TokenType) Type {
-	switch literalType {
-	case lexer.INT:
-		return CreateVariableType("int", false)
-	case lexer.FLOAT:
-		return CreateVariableType("float", false)
-	case lexer.BOOL:
-		return CreateVariableType("bool", false)
-	case lexer.STRING:
-		return CreateVariableType("string", false)
+	typeName := strings.ToLower(lexer.TokenTypeToString(literalType))
+
+	if internalType, typeExists := internalTypes[typeName]; typeExists {
+		return internalType
 	}
 
-	return CreateVariableType("null", false)
+	return internalTypes["null"]
 }
 
 func CreateTypeFrom(typeDefinition ast.TypeDefinition) Type {
@@ -138,17 +141,8 @@ func IsInternalType(target ast.TypeDefinition) (bool, Type) {
 	if targetType, ok := target.(*ast.VariableType); ok {
 		isOptional := targetType.Optional
 
-		switch targetType.Base {
-		case "int":
-			return true, CreateVariableType("int", isOptional)
-		case "float":
-			return true, CreateVariableType("float", isOptional)
-		case "bool":
-			return true, CreateVariableType("bool", isOptional)
-		case "string":
-			return true, CreateVariableType("string", isOptional)
-		default:
-			return false, nil
+		if internalType, typeExists := internalTypes[targetType.Base]; typeExists {
+			return isOptional, internalType
 		}
 	}
 

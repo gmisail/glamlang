@@ -31,6 +31,7 @@ func main() {
 	}
 
 	checker := typechecker.CreateTypeChecker()
+	start = time.Now()
 
 	for _, s := range statements {
 		ok := checker.CheckStatement(s)
@@ -42,5 +43,5 @@ func main() {
 		}
 	}
 
-	color.Blue("[glam] Done type checking.")
+	color.Blue("[glam] Done type checking in %s.", time.Since(start))
 }
