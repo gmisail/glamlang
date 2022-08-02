@@ -79,3 +79,8 @@ if div == add {
 if max == add {
 
 }
+
+let num : int = sum(10, 15)
+let another_num : int = sum(10.0, "hello")
+
+let embedded : int = sum(sum(10, 10), 10)

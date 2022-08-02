@@ -307,7 +307,49 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (bool, Type) 
 }
 
 func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (bool, Type) {
-	//	funcDef := tc.context.Find(...)
+	isCalleeValid, calleeType := tc.CheckExpression(expr.Callee)
+
+	if !isCalleeValid {
+		return false, nil
+	}
+
+	switch calleeVariableType := calleeType.(type) {
+	case *VariableType:
+		color.Red("[type] Cannot call variable instance as function.")
+		return false, nil
+	case *FunctionType:
+		var functionInstance FunctionType = *calleeVariableType
+
+		if len(functionInstance.Parameters) != len(expr.Arguments) {
+			color.Red(
+				"[type] Function call only has %d arguments, expected %d.",
+				len(functionInstance.Parameters),
+				len(expr.Arguments),
+			)
+
+			return false, nil
+		}
+
+		for i, param := range functionInstance.Parameters {
+			argValid, argType := tc.CheckExpression(expr.Arguments[i])
+
+			if !argValid {
+				return false, nil
+			}
+
+			if !param.Equals(argType) {
+				color.Red(
+					"[type] Expected type %s, got %s.",
+					param.String(),
+					argType.String(),
+				)
+
+				return false, nil
+			}
+		}
+
+		return true, functionInstance.ReturnType
+	}
 
 	return false, nil
 }
