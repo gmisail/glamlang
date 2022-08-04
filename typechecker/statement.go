@@ -275,10 +275,7 @@ func (tc *TypeChecker) checkStatementForReturns(expectedType Type, statement ast
 	case *ast.ReturnStatement:
 		_, returnType := tc.CheckExpression(statementType.Value)
 
-		fmt.Printf("%s %s\n", expectedType.String(), returnType.String())
-
 		if !expectedType.Equals(returnType) {
-
 			return false
 		}
 	case *ast.IfStatement:
@@ -286,24 +283,14 @@ func (tc *TypeChecker) checkStatementForReturns(expectedType Type, statement ast
 			return false
 		}
 
-		/*
-			tc.checkStatementForReturns(expectedType, statementType.Body)
-			if ifBody, ok := statementType.Body.(*ast.BlockStatement); ok {
-				if !tc.checkAllReturnStatements(expectedType, ifBody) {
-					return false
-				}
-			}*/
-
 		if statementType.ElseBody != nil {
 			if !tc.checkStatementForReturns(expectedType, statementType.ElseBody) {
 				return false
 			}
 		}
 	case *ast.WhileStatement:
-		if whileBody, ok := statementType.Body.(*ast.BlockStatement); ok {
-			if !tc.checkAllReturnStatements(expectedType, whileBody) {
-				return false
-			}
+		if !tc.checkStatementForReturns(expectedType, statementType.Body) {
+			return false
 		}
 	case *ast.BlockStatement:
 		if !tc.checkAllReturnStatements(expectedType, statementType) {
@@ -331,38 +318,6 @@ func (tc *TypeChecker) checkAllReturnStatements(expectedType Type, body *ast.Blo
 		if !tc.checkStatementForReturns(expectedType, statement) {
 			return false
 		}
-
-		/*switch statementType := statement.(type) {
-
-		case *ast.IfStatement:
-			if ifBody, ok := statementType.Body.(*ast.BlockStatement); ok {
-				if !tc.checkAllReturnStatements(expectedType, ifBody) {
-					return false
-				}
-			}
-
-			if statementType.ElseBody != nil {
-				fmt.Println("checking else")
-
-				if elseBody, ok := statementType.ElseBody.(*ast.BlockStatement); ok {
-					fmt.Println("checking else... body is block")
-
-					if !tc.checkAllReturnStatements(expectedType, elseBody) {
-						return false
-					}
-				}
-			}
-		case *ast.WhileStatement:
-			if whileBody, ok := statementType.Body.(*ast.BlockStatement); ok {
-				if !tc.checkAllReturnStatements(expectedType, whileBody) {
-					return false
-				}
-			}
-		case *ast.BlockStatement:
-			if !tc.checkAllReturnStatements(expectedType, statementType) {
-				return false
-			}
-		}*/
 	}
 
 	return true

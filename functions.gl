@@ -8,8 +8,15 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
             if 0 == 0 {
                 return 10
             } else if 10 == 10 {
+                let z : int = 5
+                let y : int = 5
+
                 return 10
             }
+
+            sum(10, 10)
+
+            return 0
         }
     }
 
