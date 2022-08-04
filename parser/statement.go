@@ -175,6 +175,16 @@ func (p *Parser) parseExpressionStatement() (ast.Statement, error) {
 	return &ast.ExpressionStatement{Value: expression}, err
 }
 
+func (p *Parser) parseReturnStatement() (ast.Statement, error) {
+	value, valueErr := p.parseExpression()
+
+	if valueErr != nil {
+		return nil, valueErr
+	}
+
+	return &ast.ReturnStatement{Value: value}, nil
+}
+
 func (p *Parser) parseStatement() (ast.Statement, error) {
 	if p.CurrentToken() == nil {
 		return nil, nil
@@ -188,6 +198,8 @@ func (p *Parser) parseStatement() (ast.Statement, error) {
 		return p.parseWhileStatement()
 	} else if p.MatchToken(lexer.STRUCT) {
 		return p.parseStructDeclaration()
+	} else if p.MatchToken(lexer.RETURN) {
+		return p.parseReturnStatement()
 	}
 
 	return p.parseExpressionStatement()

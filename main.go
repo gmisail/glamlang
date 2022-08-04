@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 )
 
 func main() {
-	fileData, err := os.ReadFile("./typecheck.gl")
+	fileData, err := os.ReadFile("./functions.gl")
 
 	if err != nil {
 		panic(err)
@@ -33,15 +32,7 @@ func main() {
 	checker := typechecker.CreateTypeChecker()
 	start = time.Now()
 
-	for _, s := range statements {
-		ok := checker.CheckStatement(s)
-
-		if ok {
-			fmt.Printf("VALID: %s\n", s.String())
-		} else {
-			fmt.Printf("INVALID: %s\n", s.String())
-		}
-	}
+	checker.CheckAll(statements)
 
 	color.Blue("[glam] Done type checking in %s.", time.Since(start))
 }

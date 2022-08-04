@@ -135,6 +135,15 @@ func (w *WhileStatement) String() string {
 	return fmt.Sprintf("(WhileStatement condition: %s, body: %s)", w.Condition.String(), w.Body.String())
 }
 
+type ReturnStatement struct {
+	Statement
+	Value Expression
+}
+
+func (r *ReturnStatement) String() string {
+	return fmt.Sprintf("(ReturnStatement value: %s)", r.Value.String())
+}
+
 type Unary struct {
 	Expression
 	Value    Expression

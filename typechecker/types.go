@@ -34,6 +34,10 @@ var internalTypes = map[string]Type{
 }
 
 func (v *VariableType) Equals(otherType Type) bool {
+	if otherType == nil {
+		return false
+	}
+
 	/*
 		int == int 	 	   (yes)
 		bool == bool 	   (yes)
@@ -60,6 +64,10 @@ func (v *VariableType) String() string {
 }
 
 func (f *FunctionType) Equals(otherType Type) bool {
+	if otherType == nil {
+		return false
+	}
+
 	/*
 		If the otherType is a variable type (i.e. int, string, etc...)
 		automatically reject it since a function signature =/= variable type.

@@ -53,7 +53,7 @@ struct Account {
 }
 
 let sum : (int, int) -> int = fun(bugs:int, bunny:int): int => {
-	bugs + bunny
+	return bugs + bunny
 }
 
 let comp : (bool, int) -> bool = fun(cats: int): bool => {
