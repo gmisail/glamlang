@@ -11,7 +11,8 @@ import (
 )
 
 func main() {
-	fileData, err := os.ReadFile("./functions.gl")
+	fileName := os.Args[1]
+	fileData, err := os.ReadFile(fileName)
 
 	if err != nil {
 		panic(err)

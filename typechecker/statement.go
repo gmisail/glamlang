@@ -70,8 +70,6 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) bool
 	validType, valueType := tc.CheckExpression(v.Value)
 
 	if !validType {
-		color.Red("[type] error in nested expression")
-
 		return false
 	}
 
@@ -186,6 +184,9 @@ func (tc *TypeChecker) checkReturnStatement(stat *ast.ReturnStatement) bool {
 	return ok
 }
 
+/*
+	Check if block has a return statement.
+*/
 func (tc *TypeChecker) hasReturnStatement(body *ast.BlockStatement) bool {
 	if len(body.Statements) <= 0 {
 		return false
@@ -205,10 +206,6 @@ func (tc *TypeChecker) hasReturnStatement(body *ast.BlockStatement) bool {
 	Returns if there is a return statement and if there is an error.
 */
 func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Statement) (bool, error) {
-	/*
-		TODO: clean up this code, error messages, etc...
-	*/
-
 	/*
 			There are two options:
 
@@ -270,6 +267,10 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 	return false, errors.New("Checking for return statement on invalid statement.")
 }
 
+/*
+	Validate type of return statement in a single statement. Check for nested
+	return statements as well.
+*/
 func (tc *TypeChecker) checkStatementForReturns(expectedType Type, statement ast.Statement) bool {
 	switch statementType := statement.(type) {
 	case *ast.ReturnStatement:
@@ -301,6 +302,9 @@ func (tc *TypeChecker) checkStatementForReturns(expectedType Type, statement ast
 	return true
 }
 
+/*
+	Validate type of *every* return statement in a block.
+*/
 func (tc *TypeChecker) checkAllReturnStatements(expectedType Type, body *ast.BlockStatement) bool {
 	// if block has a return, it must be the LAST statement.
 	if tc.hasReturnStatement(body) {
@@ -308,7 +312,7 @@ func (tc *TypeChecker) checkAllReturnStatements(expectedType Type, body *ast.Blo
 
 		if err != nil && !isValid {
 			color.Red(err.Error())
-			// TODO: handle error
+
 			return false
 		}
 	}

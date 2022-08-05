@@ -248,14 +248,20 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (bool, Type) {
 			return false, nil
 		}
 
+		fmt.Printf("unary is %s\n", valueType.String())
+
 		return true, valueType
 	case lexer.SUB:
 		// -(number)
 		validType, valueType := tc.CheckExpression(expr.Value)
 
-		if !validType || !valueType.Equals(CreateTypeFromLiteral(lexer.INT)) || !valueType.Equals(CreateTypeFromLiteral(lexer.FLOAT)) {
+		if !validType || (!valueType.Equals(CreateTypeFromLiteral(lexer.INT)) && !valueType.Equals(CreateTypeFromLiteral(lexer.FLOAT))) {
+			color.Red("error!! got type %s, expected %s", valueType.String(), expectedType.String())
+
 			return false, nil
 		}
+
+		fmt.Printf("unary is %s\n", valueType.String())
 
 		return true, valueType
 	}

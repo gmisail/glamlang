@@ -5,4 +5,4 @@ tasks:
     cmds:
       - gofmt -w .
       - go build .
-      - ./glamlang
+      - ./glamlang lib/math.gl
