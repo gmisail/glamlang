@@ -26,6 +26,10 @@ func (p *ParseError) Error() string {
 	return fmt.Sprintf("line %d: %s", p.line, p.message)
 }
 
+func CreateParseError(line int, message string) *ParseError {
+	return &ParseError{line, message}
+}
+
 func (p *Parser) AdvanceToken() {
 	p.current += 1
 }
