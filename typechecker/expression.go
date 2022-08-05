@@ -162,7 +162,7 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (bool, Type) {
 
 	switch calleeVariableType := calleeType.(type) {
 	case *VariableType:
-		color.Red("[type] Cannot call variable instance as function.")
+		color.Red("[type] Cannot call instance of non-function.")
 		return false, nil
 	case *FunctionType:
 		var functionInstance FunctionType = *calleeVariableType
@@ -245,10 +245,10 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (bool, Type) {
 		validType, valueType := tc.CheckExpression(expr.Value)
 
 		if !validType || !valueType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
+			color.Red("[type] Expected type in 'not' expression to be bool, instead got incompatible type %s.", valueType.String())
+
 			return false, nil
 		}
-
-		fmt.Printf("unary is %s\n", valueType.String())
 
 		return true, valueType
 	case lexer.SUB:
@@ -256,12 +256,10 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (bool, Type) {
 		validType, valueType := tc.CheckExpression(expr.Value)
 
 		if !validType || (!valueType.Equals(CreateTypeFromLiteral(lexer.INT)) && !valueType.Equals(CreateTypeFromLiteral(lexer.FLOAT))) {
-			color.Red("error!! got type %s, expected %s", valueType.String(), expectedType.String())
+			color.Red("[type] Expected type in negation to be int or float, instead got incompatible type %s.", valueType.String())
 
 			return false, nil
 		}
-
-		fmt.Printf("unary is %s\n", valueType.String())
 
 		return true, valueType
 	}

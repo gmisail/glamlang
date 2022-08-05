@@ -5,3 +5,6 @@ let abs: (int) -> int = fun(i: int): int => {
 
 	return i
 }
+
+abs(10)
+abs(-100)

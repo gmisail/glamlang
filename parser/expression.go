@@ -289,7 +289,7 @@ func (p *Parser) parseLogicalOr() (ast.Expression, error) {
 		return nil, andErr
 	}
 
-	for p.MatchToken(lexer.AND) {
+	for p.MatchToken(lexer.OR) {
 		op := p.PreviousToken()
 		right, rightErr := p.parseLogicalAnd()
 

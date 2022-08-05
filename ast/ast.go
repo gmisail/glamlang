@@ -52,7 +52,7 @@ type Logical struct {
 }
 
 func (l *Logical) String() string {
-	return fmt.Sprintf("(Logical)")
+	return fmt.Sprintf("(Logical op: %s, left: %s, right: %s)", lexer.TokenTypeToString(l.Operator), l.Left.String(), l.Right.String())
 }
 
 type VariableDeclaration struct {
