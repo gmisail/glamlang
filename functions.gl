@@ -21,7 +21,7 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
     }
 
     if bugs == 0 {
-        return 10
+        return "false"
     }
 
     if bugs == 0

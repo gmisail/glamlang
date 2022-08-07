@@ -5,7 +5,7 @@ tasks:
     cmds:
       - gofmt -w .
       - go build .
-      - ./glamlang lib/math.gl
+      - ./glamlang {{.CLI_ARGS}}
   test:
     cmds:
       - go test ./tests -v

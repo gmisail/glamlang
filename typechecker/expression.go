@@ -20,7 +20,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 		targetExists, targetType := tc.context.Find(exprType.Value)
 
 		if !targetExists {
-			return nil, CreateTypeError(fmt.Sprintf("[type] Can't find variable %s.\n", exprType.String()))
+			return nil, CreateTypeError(fmt.Sprintf("Can't find variable %s.", exprType.String()))
 		}
 
 		return *targetType, nil
@@ -36,11 +36,11 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 			parameters[i] = paramType
 
 			if !tc.context.Add(param.Name, &paramType) {
-				color.Red("[type] Variable '%s' already exists in this scope.", param.Name)
+				color.Red("Variable '%s' already exists in this scope.", param.Name)
 			}
 		}
 
-		validBody := tc.CheckStatement(exprType.Body)
+		bodyErr := tc.CheckStatement(exprType.Body)
 		returnType := CreateTypeFrom(exprType.ReturnType)
 		hasReturn, returnErr := tc.checkLastReturnStatement(returnType, exprType.Body)
 
@@ -49,23 +49,19 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 		}
 
 		if body, ok := exprType.Body.(*ast.BlockStatement); ok {
-			allReturnsValid := tc.checkAllReturnStatements(returnType, body)
-
-			if !allReturnsValid {
-				return nil, CreateTypeError("Some returns in function expression are invalid.")
+			if returnErr := tc.checkAllReturnStatements(returnType, body); returnErr != nil {
+				return nil, returnErr
 			}
 		}
 
 		if returnErr != nil {
-			color.Red(returnErr.Error())
-
 			return nil, returnErr
 		}
 
 		tc.context.ExitScope()
 
-		if !validBody {
-			return nil, CreateTypeError("Invalid function body.")
+		if bodyErr != nil {
+			return nil, bodyErr
 		}
 
 		return &FunctionType{Parameters: parameters, ReturnType: CreateTypeFrom(exprType.ReturnType)}, nil
@@ -106,7 +102,7 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (Type, error)
 
 		if !memberExists {
 			message := fmt.Sprintf(
-				"[type] Member variable '%s' does not exist on type '%s'.",
+				"Member variable '%s' does not exist on type '%s'.",
 				expr.Name,
 				typeName,
 			)
@@ -154,7 +150,7 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (Type, error) {
 
 			if !param.Equals(argType) {
 				message := fmt.Sprintf(
-					"[type] Expected type %s, got %s.",
+					"Expected type %s, got %s.",
 					param.String(),
 					argType.String(),
 				)
@@ -220,7 +216,7 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
 		}
 
 		if !valueType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
-			message := fmt.Sprintf("[type] Expected type in 'not' expression to be bool, instead got incompatible type %s.", valueType.String())
+			message := fmt.Sprintf("Expected type in 'not' expression to be bool, instead got incompatible type %s.", valueType.String())
 			return nil, CreateTypeError(message)
 		}
 
@@ -234,7 +230,7 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
 		}
 
 		if !valueType.Equals(CreateTypeFromLiteral(lexer.INT)) && !valueType.Equals(CreateTypeFromLiteral(lexer.FLOAT)) {
-			message := fmt.Sprintf("[type] Expected type in negation to be int or float, instead got incompatible type %s.", valueType.String())
+			message := fmt.Sprintf("Expected type in negation to be int or float, instead got incompatible type %s.", valueType.String())
 			return nil, CreateTypeError(message)
 		}
 

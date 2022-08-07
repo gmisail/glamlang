@@ -60,7 +60,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 	isValidVariable := tc.context.Add(v.Name, &variableType)
 
 	if !isValidVariable {
-		message := fmt.Sprintf("[type] Variable %s already in scope.\n", v.String())
+		message := fmt.Sprintf("Variable %s already in scope.\n", v.String())
 		return CreateTypeError(message)
 	}
 
@@ -74,7 +74,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 
 	if !isEqual {
 		message := fmt.Sprintf(
-			"[type] Invalid type in variable declaration. Expected %s but got %s.\n",
+			"Invalid type in variable declaration. Expected %s but got %s.\n",
 			variableType.String(),
 			valueType.String(),
 		)
@@ -98,7 +98,7 @@ func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) error {
 
 	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
 		message := fmt.Sprintf(
-			"[type] Expected condition in 'if' statement to be boolean, got %s.",
+			"Expected condition in 'if' statement to be boolean, got %s.",
 			conditionType.String(),
 		)
 
@@ -130,7 +130,7 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 
 	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
 		message := fmt.Sprintf(
-			"[type] Expected condition in 'while' statement to be boolean, got %s.",
+			"Expected condition in 'while' statement to be boolean, got %s.",
 			conditionType.String(),
 		)
 
@@ -148,7 +148,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 	isUnique, structEnv := tc.context.environment.AddType(stat.Name)
 
 	if !isUnique {
-		message := fmt.Sprintf("[type] Struct '%s' already defined.", stat.String())
+		message := fmt.Sprintf("Struct '%s' already defined.", stat.String())
 		return CreateTypeError(message)
 	}
 
@@ -163,7 +163,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 
 				if !isPrimitive {
 					message := fmt.Sprintf(
-						"[type] Type '%s' does not exist in this context.",
+						"Type '%s' does not exist in this context.",
 						variableType.String(),
 					)
 
@@ -231,7 +231,7 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 	switch stat := body.(type) {
 	case *ast.BlockStatement:
 		if len(stat.Statements) <= 0 {
-			return false, CreateTypeError("[type] Body does not have a return statement.")
+			return false, CreateTypeError("Body does not have a return statement.")
 		}
 
 		lastStatement := stat.Statements[len(stat.Statements)-1]
@@ -243,7 +243,7 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 			if !expectedType.Equals(returnType) {
 				return false, CreateTypeError(
 					fmt.Sprintf(
-						"[type] Expected function to return value of type %s, but instead returned %s.",
+						"Expected function to return value of type %s, but instead returned %s.",
 						expectedType.String(),
 						returnType.String(),
 					))
@@ -263,7 +263,7 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 		if !expressionType.Equals(expressionType) {
 			return false, errors.New(
 				fmt.Sprintf(
-					"[type] Expected function to return value of type %s, but instead returned %s.",
+					"Expected function to return value of type %s, but instead returned %s.",
 					expectedType.String(),
 					expressionType.String(),
 				))
