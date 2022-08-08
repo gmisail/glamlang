@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
@@ -11,23 +9,6 @@ import (
 type Parser struct {
 	current int
 	Tokens  []lexer.Token
-}
-
-type ParseError struct {
-	line    int
-	message string
-}
-
-func (p *ParseError) Error() string {
-	if p.line == 0 {
-		return fmt.Sprintf("EOF: %s", p.message)
-	}
-
-	return fmt.Sprintf("line %d: %s", p.line, p.message)
-}
-
-func CreateParseError(line int, message string) *ParseError {
-	return &ParseError{line, message}
 }
 
 func (p *Parser) AdvanceToken() {

@@ -158,4 +158,6 @@ type Token struct {
 	Type    TokenType
 	Literal string
 	Line    int
+	Start   int
+	Length  int
 }

@@ -2,6 +2,20 @@ let sum : (int, int) -> int = fun(bugs:int, bunny:int): int => {
 	return bugs + bunny
 }
 
+struct Test {
+    i: int
+}
+
+
+struct Account {
+	balance: float
+	name: string
+	is_overdrawn: bool
+	linked_account: Account
+}
+
+let a : Account
+
 let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
     if bugs == 0 {
         while true {
@@ -9,7 +23,7 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
                 return 10
             } else if 10 == 10 {
                 let z : int = 5
-                let y : int = 5
+                let y : int = 1
 
                 return 10
             }

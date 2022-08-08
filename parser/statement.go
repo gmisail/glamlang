@@ -39,7 +39,7 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 		}
 	}
 
-	return &ast.VariableDeclaration{Name: name.Literal, Type: variableType, Value: value}, nil
+	return &ast.VariableDeclaration{Name: name.Literal, Type: variableType, Value: value, Line: name.Line}, nil
 }
 
 func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
@@ -83,7 +83,7 @@ func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 		}
 	}
 
-	return &ast.StructDeclaration{Name: identifier.Literal, Variables: variables}, nil
+	return &ast.StructDeclaration{Name: identifier.Literal, Variables: variables, Line: identifier.Line}, nil
 }
 
 func (p *Parser) parseDeclaration() (ast.Statement, error) {
@@ -96,6 +96,8 @@ func (p *Parser) parseDeclaration() (ast.Statement, error) {
 
 func (p *Parser) parseBlockStatement() (ast.Statement, error) {
 	statements := make([]ast.Statement, 0)
+
+	openParen := p.PreviousToken()
 
 	// TODO: make function for "check"
 	for p.CurrentToken().Type != lexer.R_BRACE /*&& is not at end */ {
@@ -118,10 +120,11 @@ func (p *Parser) parseBlockStatement() (ast.Statement, error) {
 		return nil, rightBraceErr
 	}
 
-	return &ast.BlockStatement{Statements: statements}, nil
+	return &ast.BlockStatement{Statements: statements, Line: openParen.Line}, nil
 }
 
 func (p *Parser) parseIfStatement() (ast.Statement, error) {
+	line := p.PreviousToken().Line
 	condition, conditionErr := p.parseExpression()
 
 	if conditionErr != nil {
@@ -146,10 +149,11 @@ func (p *Parser) parseIfStatement() (ast.Statement, error) {
 		elseBranch = elseBranchStatement
 	}
 
-	return &ast.IfStatement{Condition: condition, Body: ifBranch, ElseBody: elseBranch}, nil
+	return &ast.IfStatement{Condition: condition, Body: ifBranch, ElseBody: elseBranch, Line: line}, nil
 }
 
 func (p *Parser) parseWhileStatement() (ast.Statement, error) {
+	line := p.PreviousToken().Line
 	condition, conditionErr := p.parseExpression()
 
 	if conditionErr != nil {
@@ -162,11 +166,13 @@ func (p *Parser) parseWhileStatement() (ast.Statement, error) {
 		return nil, bodyErr
 	}
 
-	return &ast.WhileStatement{Condition: condition, Body: body}, nil
+	return &ast.WhileStatement{Condition: condition, Body: body, Line: line}, nil
 }
 
 func (p *Parser) parseExpressionStatement() (ast.Statement, error) {
 	expression, err := p.parseExpression()
+
+	// TODO: get line from expression
 
 	if err != nil {
 		return nil, err
@@ -176,13 +182,14 @@ func (p *Parser) parseExpressionStatement() (ast.Statement, error) {
 }
 
 func (p *Parser) parseReturnStatement() (ast.Statement, error) {
+	line := p.PreviousToken().Line
 	value, valueErr := p.parseExpression()
 
 	if valueErr != nil {
 		return nil, valueErr
 	}
 
-	return &ast.ReturnStatement{Value: value}, nil
+	return &ast.ReturnStatement{Value: value, Line: line}, nil
 }
 
 func (p *Parser) parseStatement() (ast.Statement, error) {

@@ -20,7 +20,10 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 		targetExists, targetType := tc.context.Find(exprType.Value)
 
 		if !targetExists {
-			return nil, CreateTypeError(fmt.Sprintf("Can't find variable %s.", exprType.String()))
+			return nil, CreateTypeError(
+				fmt.Sprintf("Can't find variable %s.", exprType.String()),
+				exprType.Line,
+			)
 		}
 
 		return *targetType, nil
@@ -45,7 +48,10 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 		hasReturn, returnErr := tc.checkLastReturnStatement(returnType, exprType.Body)
 
 		if !hasReturn {
-			return nil, CreateTypeError("Function missing return statement.")
+			return nil, CreateTypeError(
+				"Function missing return statement.",
+				0,
+			)
 		}
 
 		if body, ok := exprType.Body.(*ast.BlockStatement); ok {
@@ -95,7 +101,10 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (Type, error)
 		typeExists, typeMembers := tc.context.environment.GetType(typeName)
 
 		if !typeExists {
-			return nil, CreateTypeError("Cannot access member variable from a non-existent struct type.")
+			return nil, CreateTypeError(
+				"Cannot access member variable from a non-existent struct type.",
+				expr.Line,
+			)
 		}
 
 		memberExists, memberType := typeMembers.Find(expr.Name)
@@ -107,12 +116,15 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (Type, error)
 				typeName,
 			)
 
-			return nil, CreateTypeError(message)
+			return nil, CreateTypeError(message, expr.Line)
 		}
 
 		return *memberType, nil
 	case *FunctionType:
-		return nil, CreateTypeError("Cannot access a member variable of a function type.")
+		return nil, CreateTypeError(
+			"Cannot access a member variable of a function type.",
+			expr.Line,
+		)
 	}
 
 	return nil, nil
@@ -127,7 +139,10 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (Type, error) {
 
 	switch calleeVariableType := calleeType.(type) {
 	case *VariableType:
-		return nil, CreateTypeError("Cannot call instance of non-function.")
+		return nil, CreateTypeError(
+			"Cannot call instance of non-function.",
+			expr.Line,
+		)
 	case *FunctionType:
 		var functionInstance FunctionType = *calleeVariableType
 
@@ -138,7 +153,7 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (Type, error) {
 				len(expr.Arguments),
 			)
 
-			return nil, CreateTypeError(message)
+			return nil, CreateTypeError(message, expr.Line)
 		}
 
 		for i, param := range functionInstance.Parameters {
@@ -155,7 +170,7 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (Type, error) {
 					argType.String(),
 				)
 
-				return nil, CreateTypeError(message)
+				return nil, CreateTypeError(message, expr.Line)
 			}
 		}
 
@@ -187,7 +202,7 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (Type, error) {
 			rightType.String(),
 		)
 
-		return nil, CreateTypeError(message)
+		return nil, CreateTypeError(message, expr.Line)
 	}
 
 	switch expr.Operator {
@@ -217,7 +232,8 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
 
 		if !valueType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
 			message := fmt.Sprintf("Expected type in 'not' expression to be bool, instead got incompatible type %s.", valueType.String())
-			return nil, CreateTypeError(message)
+
+			return nil, CreateTypeError(message, expr.Line)
 		}
 
 		return valueType, nil
@@ -231,7 +247,8 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
 
 		if !valueType.Equals(CreateTypeFromLiteral(lexer.INT)) && !valueType.Equals(CreateTypeFromLiteral(lexer.FLOAT)) {
 			message := fmt.Sprintf("Expected type in negation to be int or float, instead got incompatible type %s.", valueType.String())
-			return nil, CreateTypeError(message)
+
+			return nil, CreateTypeError(message, expr.Line)
 		}
 
 		return valueType, nil
@@ -256,11 +273,17 @@ func (tc *TypeChecker) checkLogical(expr *ast.Logical) (Type, error) {
 	boolType := CreateTypeFromLiteral(lexer.BOOL)
 
 	if !leftType.Equals(boolType) {
-		return nil, CreateTypeError(fmt.Sprintf("Expected the left side of logical statement to be of type bool, got %s.", leftType.String()))
+		return nil, CreateTypeError(
+			fmt.Sprintf("Expected the left side of logical statement to be of type bool, got %s.", leftType.String()),
+			expr.Line,
+		)
 	}
 
 	if !rightType.Equals(boolType) {
-		return nil, CreateTypeError(fmt.Sprintf("Expected the right side of logical statement to be of type bool, got %s.", rightType.String()))
+		return nil, CreateTypeError(
+			fmt.Sprintf("Expected the right side of logical statement to be of type bool, got %s.", rightType.String()),
+			expr.Line,
+		)
 	}
 
 	return boolType, nil

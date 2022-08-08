@@ -2,40 +2,40 @@ package parser
 
 import (
 	"fmt"
-
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
 )
 
 func (p *Parser) parsePrimary() (ast.Expression, error) {
-	if p.MatchToken(lexer.FALSE) {
-		return &ast.Literal{Value: false, Type: lexer.BOOL}, nil
-	} else if p.MatchToken(lexer.TRUE) {
-		return &ast.Literal{Value: true, Type: lexer.BOOL}, nil
-	} else if p.MatchToken(lexer.NULL) {
-		return &ast.Literal{Value: nil, Type: lexer.NULL}, nil
-	} else if p.MatchToken(lexer.STRING, lexer.INT, lexer.FLOAT) {
-		previousToken := p.PreviousToken()
+	token := p.CurrentToken()
 
-		return &ast.Literal{Value: previousToken.Literal, Type: previousToken.Type}, nil
+	if p.MatchToken(lexer.FALSE) {
+		return &ast.Literal{Value: false, Type: lexer.BOOL, Line: token.Line}, nil
+	} else if p.MatchToken(lexer.TRUE) {
+		return &ast.Literal{Value: true, Type: lexer.BOOL, Line: token.Line}, nil
+	} else if p.MatchToken(lexer.NULL) {
+		return &ast.Literal{Value: nil, Type: lexer.NULL, Line: token.Line}, nil
+	} else if p.MatchToken(lexer.STRING, lexer.INT, lexer.FLOAT) {
+		return &ast.Literal{Value: token.Literal, Type: token.Type, Line: token.Line}, nil
 	} else if p.MatchToken(lexer.IDENTIFIER) {
-		return &ast.VariableExpression{Value: p.PreviousToken().Literal}, nil
+		return &ast.VariableExpression{Value: p.PreviousToken().Literal, Line: token.Line}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
 		expr, _ := p.parseExpression()
-
+		//benabenabenabenabenabenabenabenabenabenabenabenabenabena
+		//yayayayayayayayayayaayayayayayaya
 		_, err := p.Consume(lexer.R_PAREN, "Expected closing parenthesis for group expression.")
 
 		if err != nil {
 			return nil, err
 		}
 
-		return &ast.Group{Value: expr}, nil
+		return &ast.Group{Value: expr, Line: token.Line}, nil
 	}
 
 	return nil, &ParseError{message: fmt.Sprintf("Unexpected token: %s", lexer.TokenTypeToString(p.CurrentToken().Type)), line: p.CurrentToken().Line}
 }
 
-func (p *Parser) finishParseCall(callee ast.Expression) (ast.Expression, error) {
+func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expression, error) {
 	arguments := make([]ast.Expression, 0)
 
 	for p.CurrentToken().Type != lexer.R_PAREN {
@@ -59,7 +59,7 @@ func (p *Parser) finishParseCall(callee ast.Expression) (ast.Expression, error) 
 		return nil, rightParenErr
 	}
 
-	return &ast.FunctionCall{Callee: callee, Arguments: arguments}, nil
+	return &ast.FunctionCall{Callee: callee, Arguments: arguments, Line: startLine}, nil
 }
 
 func (p *Parser) parseCall() (ast.Expression, error) {
@@ -73,15 +73,17 @@ func (p *Parser) parseCall() (ast.Expression, error) {
 
 	for {
 		if p.MatchToken(lexer.L_PAREN) {
-			expr, callErr = p.finishParseCall(expr)
+			line := p.PreviousToken().Line
+			expr, callErr = p.finishParseCall(line, expr)
 
 			if callErr != nil {
 				return nil, callErr
 			}
 		} else if p.MatchToken(lexer.PERIOD) {
 			// TODO: handle me
+			line := p.PreviousToken().Line
 			name, _ := p.Consume(lexer.IDENTIFIER, "Expected identifier after '.'")
-			expr = &ast.GetExpression{Name: name.Literal, Parent: expr}
+			expr = &ast.GetExpression{Name: name.Literal, Parent: expr, Line: line}
 		} else {
 			break
 		}
@@ -94,11 +96,13 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 	if p.MatchToken(lexer.FUNCTION) {
 		parameters := make([]ast.VariableDeclaration, 0)
 
-		_, leftParenErr := p.Consume(lexer.L_PAREN, "Expected '('")
+		leftParen, leftParenErr := p.Consume(lexer.L_PAREN, "Expected '('")
 
 		if leftParenErr != nil {
 			return nil, leftParenErr
 		}
+
+		line := leftParen.Line
 
 		// if there's a right parenthesis, that means the function doesn't have any parameters.
 		if !p.MatchToken(lexer.R_PAREN) {
@@ -156,7 +160,7 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 			return nil, statErr
 		}
 
-		return &ast.FunctionExpression{Parameters: parameters, Body: body, ReturnType: returnType}, nil
+		return &ast.FunctionExpression{Parameters: parameters, Body: body, ReturnType: returnType, Line: line}, nil
 	}
 
 	return p.parseCall()
@@ -171,7 +175,7 @@ func (p *Parser) parseUnary() (ast.Expression, error) {
 			return nil, err
 		}
 
-		return &ast.Unary{Value: expr, Operator: op.Type}, nil
+		return &ast.Unary{Value: expr, Operator: op.Type, Line: op.Line}, nil
 	}
 
 	return p.parseFunction()
@@ -192,7 +196,7 @@ func (p *Parser) parseFactor() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type}
+		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
 	}
 
 	return expr, nil
@@ -213,7 +217,7 @@ func (p *Parser) parseTerm() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type}
+		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
 	}
 
 	return expr, nil
@@ -234,7 +238,7 @@ func (p *Parser) parseComparison() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type}
+		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
 	}
 
 	return expr, nil
@@ -255,7 +259,7 @@ func (p *Parser) parseEquality() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type}
+		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
 	}
 
 	return expr, nil
@@ -276,7 +280,7 @@ func (p *Parser) parseLogicalAnd() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type}
+		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type, Line: op.Line}
 	}
 
 	return expr, nil
@@ -297,7 +301,7 @@ func (p *Parser) parseLogicalOr() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type}
+		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type, Line: op.Line}
 	}
 
 	return expr, nil

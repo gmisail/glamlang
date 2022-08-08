@@ -147,10 +147,10 @@ func CreateTypeFrom(typeDefinition ast.TypeDefinition) Type {
 
 func IsInternalType(target ast.TypeDefinition) (bool, Type) {
 	if targetType, ok := target.(*ast.VariableType); ok {
-		isOptional := targetType.Optional
+		//isOptional := targetType.Optional
 
 		if internalType, typeExists := internalTypes[targetType.Base]; typeExists {
-			return isOptional, internalType
+			return true, internalType
 		}
 	}
 

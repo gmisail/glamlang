@@ -7,10 +7,10 @@ type TypeError struct {
 	line    int
 }
 
-func CreateTypeError(msg string) *TypeError {
-	return &TypeError{message: msg, line: 0}
+func CreateTypeError(message string, line int) *TypeError {
+	return &TypeError{message, line}
 }
 
 func (t *TypeError) Error() string {
-	return fmt.Sprintf("[type] %s\n", t.message)
+	return fmt.Sprintf("[type] line %d, %s\n", t.line, t.message)
 }

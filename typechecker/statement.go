@@ -1,7 +1,6 @@
 package typechecker
 
 import (
-	"errors"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/ast"
@@ -46,7 +45,10 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) error {
 		return tc.checkReturnStatement(targetStatement)
 	}
 
-	return CreateTypeError(fmt.Sprintf("Failed to type check unknown statement: %T\n", statement))
+	return CreateTypeError(
+		fmt.Sprintf("Failed to type check unknown statement: %T\n", statement),
+		0,
+	)
 }
 
 func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) error {
@@ -61,7 +63,11 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 
 	if !isValidVariable {
 		message := fmt.Sprintf("Variable %s already in scope.\n", v.String())
-		return CreateTypeError(message)
+		return CreateTypeError(message, v.Line)
+	}
+
+	if v.Value == nil {
+		return CreateTypeError("Variable declaration cannot have a value of null.", v.Line)
 	}
 
 	valueType, valueErr := tc.CheckExpression(v.Value)
@@ -79,7 +85,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 			valueType.String(),
 		)
 
-		return CreateTypeError(message)
+		return CreateTypeError(message, v.Line)
 	}
 
 	return nil
@@ -102,7 +108,7 @@ func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) error {
 			conditionType.String(),
 		)
 
-		return CreateTypeError(message)
+		return CreateTypeError(message, stat.Line)
 	}
 
 	if statementErr := tc.CheckStatement(stat.Body); statementErr != nil {
@@ -134,7 +140,7 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 			conditionType.String(),
 		)
 
-		return CreateTypeError(message)
+		return CreateTypeError(message, stat.Line)
 	}
 
 	if statementErr := tc.CheckStatement(stat.Body); statementErr != nil {
@@ -149,7 +155,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 
 	if !isUnique {
 		message := fmt.Sprintf("Struct '%s' already defined.", stat.String())
-		return CreateTypeError(message)
+		return CreateTypeError(message, stat.Line)
 	}
 
 	for _, structVariable := range stat.Variables {
@@ -167,7 +173,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 						variableType.String(),
 					)
 
-					return CreateTypeError(message)
+					return CreateTypeError(message, structVariable.Line)
 				}
 			}
 		case *FunctionType:
@@ -182,7 +188,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 
 func (tc *TypeChecker) checkReturnStatement(stat *ast.ReturnStatement) error {
 	if stat.Value == nil {
-		return CreateTypeError("Return statement must have value.")
+		return CreateTypeError("Return statement must have value.", stat.Line)
 	}
 
 	if _, err := tc.CheckExpression(stat.Value); err != nil {
@@ -231,13 +237,15 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 	switch stat := body.(type) {
 	case *ast.BlockStatement:
 		if len(stat.Statements) <= 0 {
-			return false, CreateTypeError("Body does not have a return statement.")
+			return false, CreateTypeError(
+				"Body does not have a return statement.",
+				stat.Line,
+			)
 		}
 
 		lastStatement := stat.Statements[len(stat.Statements)-1]
 
-		switch statement := lastStatement.(type) {
-		case *ast.ReturnStatement:
+		if statement, ok := lastStatement.(*ast.ReturnStatement); ok {
 			returnType, _ := tc.CheckExpression(statement.Value)
 
 			if !expectedType.Equals(returnType) {
@@ -246,13 +254,18 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 						"Expected function to return value of type %s, but instead returned %s.",
 						expectedType.String(),
 						returnType.String(),
-					))
+					),
+					statement.Line,
+				)
 			}
 
 			return true, nil
 		}
 
-		return false, CreateTypeError("The last statement of a function body must be a return statement.")
+		return false, CreateTypeError(
+			"The last statement of a function body must be a return statement.",
+			stat.Line,
+		)
 	case *ast.ExpressionStatement:
 		expressionType, err := tc.CheckExpression(stat.Value)
 
@@ -261,18 +274,23 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 		}
 
 		if !expressionType.Equals(expressionType) {
-			return false, errors.New(
+			return false, CreateTypeError(
 				fmt.Sprintf(
 					"Expected function to return value of type %s, but instead returned %s.",
 					expectedType.String(),
 					expressionType.String(),
-				))
+				),
+				stat.Line,
+			)
 		}
 
 		return true, nil
 	}
 
-	return false, CreateTypeError("Checking for return statement on invalid statement.")
+	return false, CreateTypeError(
+		"Checking for return statement on invalid statement.",
+		0,
+	)
 }
 
 /*

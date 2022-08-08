@@ -9,6 +9,7 @@ type Lexer struct {
 	current int
 	line    int
 	input   string
+	index   int
 	Tokens  []Token
 }
 
@@ -47,6 +48,7 @@ func (l *Lexer) IsAtEnd() bool {
 }
 
 func (l *Lexer) AdvanceChar() {
+	l.index += 1
 	l.current += 1
 }
 
@@ -147,6 +149,7 @@ func (l *Lexer) ScanString() string {
 		nextChar := l.PeekChar()
 
 		if nextChar == '\n' {
+			l.index = 0
 			l.line += 1
 		} else if nextChar == '"' || nextChar == 0 {
 			break
@@ -169,6 +172,7 @@ func (l *Lexer) SkipWhitespace() {
 		case '\r', '\t', ' ':
 			l.AdvanceChar()
 		case '\n':
+			l.index = 0
 			l.line += 1
 			l.AdvanceChar()
 		default:
@@ -178,8 +182,16 @@ func (l *Lexer) SkipWhitespace() {
 }
 
 func (l *Lexer) AddToken(tokenType TokenType, literal string) Token {
-	t := Token{Type: tokenType, Literal: literal, Line: l.line}
+	t := Token{
+		Type:    tokenType,
+		Literal: literal,
+		Line:    l.line,
+		Start:   l.index - len(literal),
+		Length:  len(literal),
+	}
+
 	l.Tokens = append(l.Tokens, t)
+
 	return t
 }
 
@@ -267,7 +279,7 @@ func (l *Lexer) ScanToken() bool {
 }
 
 func ScanTokens(input string) *Lexer {
-	lexer := Lexer{current: -1, line: 1, input: input, Tokens: make([]Token, 0)}
+	lexer := Lexer{current: -1, line: 1, index: -1, input: input, Tokens: make([]Token, 0)}
 
 	for lexer.ScanToken() {
 	}
