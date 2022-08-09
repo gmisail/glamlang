@@ -2,7 +2,6 @@ package typechecker
 
 import (
 	"fmt"
-	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
 )
@@ -25,7 +24,6 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) error {
 			err := tc.CheckStatement(innerStatement)
 
 			if err != nil {
-				color.Green("failed on statement: %s", innerStatement.String())
 				tc.context.ExitScope()
 
 				return err
@@ -62,7 +60,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 	isValidVariable := tc.context.Add(v.Name, &variableType)
 
 	if !isValidVariable {
-		message := fmt.Sprintf("Variable %s already in scope.\n", v.String())
+		message := fmt.Sprintf("Variable '%s' already in scope.", v.Name)
 		return CreateTypeError(message, v.Line)
 	}
 

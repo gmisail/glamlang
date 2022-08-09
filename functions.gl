@@ -6,6 +6,8 @@ struct Test {
     i: int
 }
 
+let t : Test
+let t : Test
 
 struct Account {
 	balance: float
@@ -14,10 +16,8 @@ struct Account {
 	linked_account: Account
 }
 
-let a : Account
-
 let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
-    if bugs == 0 {
+	if bugs == 0 {
         while true {
             if 0 == 0 {
                 return 10
@@ -25,7 +25,7 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
                 let z : int = 5
                 let y : int = 1
 
-                return 10
+                return t.i 
             }
 
             sum(10, 10)
@@ -35,7 +35,7 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
     }
 
     if bugs == 0 {
-        return "false"
+        return 100 
     }
 
     if bugs == 0

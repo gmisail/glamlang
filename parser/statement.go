@@ -170,15 +170,14 @@ func (p *Parser) parseWhileStatement() (ast.Statement, error) {
 }
 
 func (p *Parser) parseExpressionStatement() (ast.Statement, error) {
+	line := p.CurrentToken().Line
 	expression, err := p.parseExpression()
-
-	// TODO: get line from expression
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &ast.ExpressionStatement{Value: expression}, err
+	return &ast.ExpressionStatement{Value: expression, Line: line}, err
 }
 
 func (p *Parser) parseReturnStatement() (ast.Statement, error) {
