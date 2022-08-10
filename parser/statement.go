@@ -58,6 +58,10 @@ func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 	}
 
 	for {
+		if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
+			break
+		}
+
 		variableName, variableErr := p.Consume(lexer.IDENTIFIER, "Expected variable name")
 
 		if variableErr != nil {
@@ -78,9 +82,9 @@ func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 
 		variables = append(variables, ast.VariableDeclaration{Name: variableName.Literal, Type: variableType, Value: nil})
 
-		if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
-			break
-		}
+		//	if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
+		//		break
+		//		}
 	}
 
 	return &ast.StructDeclaration{Name: identifier.Literal, Variables: variables, Line: identifier.Line}, nil

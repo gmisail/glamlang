@@ -2,13 +2,6 @@ let sum : (int, int) -> int = fun(bugs:int, bunny:int): int => {
 	return bugs + bunny
 }
 
-struct Test {
-    i: int
-}
-
-let t : Test
-let t : Test
-
 struct Account {
 	balance: float
 	name: string

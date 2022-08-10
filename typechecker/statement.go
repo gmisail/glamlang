@@ -244,7 +244,11 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 		lastStatement := stat.Statements[len(stat.Statements)-1]
 
 		if statement, ok := lastStatement.(*ast.ReturnStatement); ok {
-			returnType, _ := tc.CheckExpression(statement.Value)
+			returnType, returnErr := tc.CheckExpression(statement.Value)
+
+			if returnErr != nil {
+				return false, returnErr
+			}
 
 			if !expectedType.Equals(returnType) {
 				return false, CreateTypeError(

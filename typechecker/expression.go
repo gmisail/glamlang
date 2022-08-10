@@ -21,7 +21,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 
 		if !targetExists {
 			return nil, CreateTypeError(
-				fmt.Sprintf("Can't find variable %s.", exprType.String()),
+				fmt.Sprintf("Undefined variable '%s'.", exprType.Value),
 				exprType.Line,
 			)
 		}
