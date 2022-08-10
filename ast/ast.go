@@ -12,6 +12,7 @@ type Statement interface {
 	Node
 }
 
-type TypeDefinition interface {
+type Type interface {
 	Node
+	Equals(Type) bool
 }

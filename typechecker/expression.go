@@ -12,10 +12,10 @@ import (
 	Checks the type of the expression and, if valid, returns true and its type. If there
 	was an error while type checking, it will return false, nil.
 */
-func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
+func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 	switch exprType := expr.(type) {
 	case *ast.Literal:
-		return CreateTypeFromLiteral(exprType.Type), nil // literals always check successfully
+		return ast.CreateTypeFromLiteral(exprType.Type), nil // literals always check successfully
 	case *ast.VariableExpression:
 		targetExists, targetType := tc.context.Find(exprType.Value)
 
@@ -31,11 +31,11 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 		// validate that the body of the function is valid
 		tc.context.EnterScope()
 
-		parameters := make([]Type, len(exprType.Parameters))
+		parameters := make([]ast.Type, len(exprType.Parameters))
 
 		// push the parameters into scope
 		for i, param := range exprType.Parameters {
-			paramType := CreateTypeFrom(param.Type)
+			paramType := param.Type
 			parameters[i] = paramType
 
 			if !tc.context.Add(param.Name, &paramType) {
@@ -44,14 +44,11 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 		}
 
 		bodyErr := tc.CheckStatement(exprType.Body)
-		returnType := CreateTypeFrom(exprType.ReturnType)
+		returnType := exprType.ReturnType
 		hasReturn, returnErr := tc.checkLastReturnStatement(returnType, exprType.Body)
 
-		if !hasReturn {
-			return nil, CreateTypeError(
-				"Function missing return statement.",
-				0,
-			)
+		if !hasReturn || returnErr != nil {
+			return nil, returnErr
 		}
 
 		if body, ok := exprType.Body.(*ast.BlockStatement); ok {
@@ -70,7 +67,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 			return nil, bodyErr
 		}
 
-		return &FunctionType{Parameters: parameters, ReturnType: CreateTypeFrom(exprType.ReturnType)}, nil
+		return &ast.FunctionType{Parameters: parameters, ReturnType: exprType.ReturnType}, nil
 	case *ast.FunctionCall:
 		return tc.checkFunctionCall(exprType)
 	case *ast.Group:
@@ -88,7 +85,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (Type, error) {
 	return nil, nil
 }
 
-func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (Type, error) {
+func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, error) {
 	parentType, parentErr := tc.CheckExpression(expr.Parent)
 
 	if parentErr != nil {
@@ -96,8 +93,8 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (Type, error)
 	}
 
 	switch variableType := parentType.(type) {
-	case *VariableType:
-		typeName := variableType.Name
+	case *ast.VariableType:
+		typeName := variableType.Base
 		typeExists, typeMembers := tc.context.environment.GetType(typeName)
 
 		if !typeExists {
@@ -120,7 +117,7 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (Type, error)
 		}
 
 		return *memberType, nil
-	case *FunctionType:
+	case *ast.FunctionType:
 		return nil, CreateTypeError(
 			"Cannot access a member variable of a function type.",
 			expr.Line,
@@ -130,7 +127,7 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (Type, error)
 	return nil, nil
 }
 
-func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (Type, error) {
+func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (ast.Type, error) {
 	calleeType, calleeErr := tc.CheckExpression(expr.Callee)
 
 	if calleeErr != nil {
@@ -138,17 +135,19 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (Type, error) {
 	}
 
 	switch calleeVariableType := calleeType.(type) {
-	case *VariableType:
+	case *ast.VariableType:
 		return nil, CreateTypeError(
 			"Cannot call instance of non-function.",
 			expr.Line,
 		)
-	case *FunctionType:
-		var functionInstance FunctionType = *calleeVariableType
+	case *ast.FunctionType:
+		var functionInstance ast.FunctionType = *calleeVariableType
 
 		if len(functionInstance.Parameters) != len(expr.Arguments) {
+			// TODO: diff the two functions, i.e. what was expected vs. what it got
+
 			message := fmt.Sprintf(
-				"Function call only has %d arguments, expected %d.",
+				"Function call has %d arguments, expected %d.",
 				len(functionInstance.Parameters),
 				len(expr.Arguments),
 			)
@@ -180,7 +179,7 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (Type, error) {
 	return nil, nil
 }
 
-func (tc *TypeChecker) checkBinary(expr *ast.Binary) (Type, error) {
+func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 	leftType, leftErr := tc.CheckExpression(expr.Left)
 
 	if leftErr != nil {
@@ -212,7 +211,7 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (Type, error) {
 		lexer.GT_EQ,
 		lexer.EQUALITY,
 		lexer.NOT_EQUAL:
-		return CreateTypeFromLiteral(lexer.BOOL), nil
+		return ast.CreateTypeFromLiteral(lexer.BOOL), nil
 	case lexer.ADD, lexer.SUB, lexer.MULT, lexer.DIV:
 		return leftType, nil
 	}
@@ -220,7 +219,7 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (Type, error) {
 	return nil, nil
 }
 
-func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
+func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 	switch expr.Operator {
 	case lexer.BANG:
 		// !(boolean expression)
@@ -230,7 +229,7 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
 			return nil, valueErr
 		}
 
-		if !valueType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
+		if !valueType.Equals(ast.CreateTypeFromLiteral(lexer.BOOL)) {
 			message := fmt.Sprintf("Expected type in 'not' expression to be bool, instead got incompatible type %s.", valueType.String())
 
 			return nil, CreateTypeError(message, expr.Line)
@@ -245,7 +244,7 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
 			return nil, valueErr
 		}
 
-		if !valueType.Equals(CreateTypeFromLiteral(lexer.INT)) && !valueType.Equals(CreateTypeFromLiteral(lexer.FLOAT)) {
+		if !valueType.Equals(ast.CreateTypeFromLiteral(lexer.INT)) && !valueType.Equals(ast.CreateTypeFromLiteral(lexer.FLOAT)) {
 			message := fmt.Sprintf("Expected type in negation to be int or float, instead got incompatible type %s.", valueType.String())
 
 			return nil, CreateTypeError(message, expr.Line)
@@ -257,7 +256,7 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (Type, error) {
 	return nil, nil
 }
 
-func (tc *TypeChecker) checkLogical(expr *ast.Logical) (Type, error) {
+func (tc *TypeChecker) checkLogical(expr *ast.Logical) (ast.Type, error) {
 	leftType, leftErr := tc.CheckExpression(expr.Left)
 
 	if leftErr != nil {
@@ -270,7 +269,7 @@ func (tc *TypeChecker) checkLogical(expr *ast.Logical) (Type, error) {
 		return nil, rightErr
 	}
 
-	boolType := CreateTypeFromLiteral(lexer.BOOL)
+	boolType := ast.CreateTypeFromLiteral(lexer.BOOL)
 
 	if !leftType.Equals(boolType) {
 		return nil, CreateTypeError(

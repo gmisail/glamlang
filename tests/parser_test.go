@@ -67,8 +67,8 @@ func TestFunctionType(t *testing.T) {
 	variable := statements[0].(*ast.VariableDeclaration)
 	functionType := variable.Type.(*ast.FunctionType)
 
-	if len(functionType.ArgumentTypes) != 2 {
-		t.Errorf("Expected %d statements, got %d.", 2, len(functionType.ArgumentTypes))
+	if len(functionType.Parameters) != 2 {
+		t.Errorf("Expected %d statements, got %d.", 2, len(functionType.Parameters))
 	}
 }
 

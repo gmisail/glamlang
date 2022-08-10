@@ -9,6 +9,12 @@ struct Account {
 	linked_account: Account
 }
 
+let create_bank : () -> Bank = fun(): Bank => {
+	return 0
+}
+
+let bank : Bank = create_bank()
+
 let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
 	if bugs == 0 {
         while true {
@@ -18,7 +24,7 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
                 let z : int = 5
                 let y : int = 1
 
-                return t.i 
+                return z * y 
             }
 
             sum(10, 10)

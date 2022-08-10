@@ -1,5 +1,11 @@
 package typechecker
 
+import (
+	"fmt"
+
+	"github.com/gmisail/glamlang/ast"
+)
+
 type Context struct {
 	environment *Environment
 }
@@ -11,7 +17,7 @@ func CreateContext() *Context {
 /*
 	Looks up the type of a variable if it exists.
 */
-func (c *Context) Find(name string) (bool, *Type) {
+func (c *Context) Find(name string) (bool, *ast.Type) {
 	isValid, variableType := c.environment.Find(name)
 
 	if isValid {
@@ -24,7 +30,7 @@ func (c *Context) Find(name string) (bool, *Type) {
 /*
 	Adds variable to the current scope.
 */
-func (c *Context) Add(variableName string, variableType *Type) bool {
+func (c *Context) Add(variableName string, variableType *ast.Type) bool {
 	return c.environment.Add(variableName, variableType)
 }
 
@@ -45,6 +51,12 @@ func (c *Context) ExitScope() {
 	if c.environment.Parent == nil {
 		return
 	}
+
+	for k := range c.environment.Values {
+		fmt.Println("pop", k)
+	}
+
+	fmt.Println("pop scope")
 
 	c.environment = c.environment.Parent
 }

@@ -1,19 +1,27 @@
 package typechecker
 
+import (
+	"fmt"
+
+	"github.com/gmisail/glamlang/ast"
+)
+
 type Environment struct {
 	Parent *Environment
-	Values map[string]*Type
+	Values map[string]*ast.Type
 	Types  map[string]*Environment
 }
 
 func CreateEnvironment(parent *Environment) *Environment {
-	return &Environment{Parent: parent, Values: make(map[string]*Type), Types: make(map[string]*Environment)}
+	return &Environment{Parent: parent, Values: make(map[string]*ast.Type), Types: make(map[string]*Environment)}
 }
 
 /*
 	Looks up the type of a variable if it exists.
 */
-func (e *Environment) Find(name string) (bool, *Type) {
+func (e *Environment) Find(name string) (bool, *ast.Type) {
+	fmt.Println(name, "in", e.Values)
+
 	// check the current scope
 	if variableType, ok := e.Values[name]; ok {
 		return true, variableType
@@ -30,7 +38,7 @@ func (e *Environment) Find(name string) (bool, *Type) {
 	Adds a variable to the context. Returns false
 	if the variable already exists in the current scope.
 */
-func (e *Environment) Add(variableName string, variableType *Type) bool {
+func (e *Environment) Add(variableName string, variableType *ast.Type) bool {
 	exists, _ := e.Find(variableName)
 
 	if exists {

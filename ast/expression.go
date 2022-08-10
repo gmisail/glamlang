@@ -2,8 +2,9 @@ package ast
 
 import (
 	"fmt"
-	"github.com/gmisail/glamlang/lexer"
 	"strings"
+
+	"github.com/gmisail/glamlang/lexer"
 )
 
 type Logical struct {
@@ -56,7 +57,7 @@ type FunctionExpression struct {
 	Line       int
 	Parameters []VariableDeclaration
 	Body       Statement
-	ReturnType TypeDefinition
+	ReturnType Type
 }
 
 func (f *FunctionExpression) String() string {

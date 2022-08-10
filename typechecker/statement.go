@@ -2,6 +2,7 @@ package typechecker
 
 import (
 	"fmt"
+
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
 )
@@ -56,7 +57,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 		verify that the l-value type is
 		equal to the r-value type.
 	*/
-	variableType := CreateTypeFrom(v.Type)
+	variableType := v.Type
 	isValidVariable := tc.context.Add(v.Name, &variableType)
 
 	if !isValidVariable {
@@ -100,7 +101,7 @@ func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) error {
 		return conditionErr
 	}
 
-	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
+	if !conditionType.Equals(ast.CreateTypeFromLiteral(lexer.BOOL)) {
 		message := fmt.Sprintf(
 			"Expected condition in 'if' statement to be boolean, got %s.",
 			conditionType.String(),
@@ -132,7 +133,7 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 		return conditionErr
 	}
 
-	if !conditionType.Equals(CreateTypeFromLiteral(lexer.BOOL)) {
+	if !conditionType.Equals(ast.CreateTypeFromLiteral(lexer.BOOL)) {
 		message := fmt.Sprintf(
 			"Expected condition in 'while' statement to be boolean, got %s.",
 			conditionType.String(),
@@ -158,12 +159,12 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 
 	for _, structVariable := range stat.Variables {
 		variableName := structVariable.Name
-		variableType := CreateTypeFrom(structVariable.Type)
+		variableType := structVariable.Type
 
 		switch innerType := variableType.(type) {
-		case *VariableType:
-			if !tc.context.environment.CustomTypeExists(innerType.Name) {
-				isPrimitive, _ := IsInternalType(structVariable.Type)
+		case *ast.VariableType:
+			if !tc.context.environment.CustomTypeExists(innerType.Base) {
+				isPrimitive, _ := ast.IsInternalType(structVariable.Type)
 
 				if !isPrimitive {
 					message := fmt.Sprintf(
@@ -174,7 +175,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 					return CreateTypeError(message, structVariable.Line)
 				}
 			}
-		case *FunctionType:
+		case *ast.FunctionType:
 			continue
 		}
 
@@ -189,9 +190,13 @@ func (tc *TypeChecker) checkReturnStatement(stat *ast.ReturnStatement) error {
 		return CreateTypeError("Return statement must have value.", stat.Line)
 	}
 
-	if _, err := tc.CheckExpression(stat.Value); err != nil {
+	returnType, err := tc.CheckExpression(stat.Value)
+
+	if err != nil {
 		return err
 	}
+
+	stat.Type = returnType
 
 	return nil
 }
@@ -217,20 +222,20 @@ func (tc *TypeChecker) hasReturnStatement(body *ast.BlockStatement) bool {
 /*
 	Returns if there is a return statement and an error if it exists.
 */
-func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Statement) (bool, error) {
+func (tc *TypeChecker) checkLastReturnStatement(expectedType ast.Type, body ast.Statement) (bool, error) {
 	/*
-			There are two options:
+		There are two options:
 
-			fun (x, y): int => x * y
-		                 ^^^^^^
-						ExpressionStatement
+		fun (x, y): int => x * y
+		                   ^^^^^^
+					ExpressionStatement
 
-			fun (x, y): int => {
-				...
-				return x * y
-			}
-			^^^^^^^^^^^^^^^^^^
-			BlockStatement
+		fun (x, y): int => {
+			...
+			return x * y
+		}
+		^^^^^^^^^^^^^^^^^^
+		BlockStatement
 	*/
 	switch stat := body.(type) {
 	case *ast.BlockStatement:
@@ -244,11 +249,7 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 		lastStatement := stat.Statements[len(stat.Statements)-1]
 
 		if statement, ok := lastStatement.(*ast.ReturnStatement); ok {
-			returnType, returnErr := tc.CheckExpression(statement.Value)
-
-			if returnErr != nil {
-				return false, returnErr
-			}
+			returnType := statement.Type.(ast.Type)
 
 			if !expectedType.Equals(returnType) {
 				return false, CreateTypeError(
@@ -299,7 +300,7 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType Type, body ast.Stat
 	Validate type of return statement in a single statement. Check for nested
 	return statements as well.
 */
-func (tc *TypeChecker) checkStatementForReturns(expectedType Type, statement ast.Statement) error {
+func (tc *TypeChecker) checkStatementForReturns(expectedType ast.Type, statement ast.Statement) error {
 	switch statementType := statement.(type) {
 	case *ast.ReturnStatement:
 		returnType, err := tc.CheckExpression(statementType.Value)
@@ -333,7 +334,7 @@ func (tc *TypeChecker) checkStatementForReturns(expectedType Type, statement ast
 /*
 	Validate type of *every* return statement in a block.
 */
-func (tc *TypeChecker) checkAllReturnStatements(expectedType Type, body *ast.BlockStatement) error {
+func (tc *TypeChecker) checkAllReturnStatements(expectedType ast.Type, body *ast.BlockStatement) error {
 	// if block has a return, it must be the LAST statement.
 	if tc.hasReturnStatement(body) {
 		isValid, err := tc.checkLastReturnStatement(expectedType, body)

@@ -39,7 +39,12 @@ func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expr
 	arguments := make([]ast.Expression, 0)
 
 	for p.CurrentToken().Type != lexer.R_PAREN {
-		argument, _ := p.parseExpression()
+		argument, argumentErr := p.parseExpression()
+
+		if argumentErr != nil {
+			return nil, argumentErr
+		}
+
 		arguments = append(arguments, argument)
 
 		// if the next token is ), then there are no more arguments
@@ -107,6 +112,11 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 		// if there's a right parenthesis, that means the function doesn't have any parameters.
 		if !p.MatchToken(lexer.R_PAREN) {
 			for {
+				// no more parameters :(
+				if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_PAREN) {
+					break
+				}
+
 				parameter, parameterErr := p.Consume(lexer.IDENTIFIER, "Expected parameter name.")
 
 				if parameterErr != nil {
@@ -128,11 +138,6 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 				parameters = append(parameters, ast.VariableDeclaration{
 					Name: parameter.Literal, Type: parameterType, Value: nil,
 				})
-
-				// no more parameters :(
-				if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_PAREN) {
-					break
-				}
 			}
 		}
 

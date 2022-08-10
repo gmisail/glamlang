@@ -9,7 +9,7 @@ type VariableDeclaration struct {
 	Statement
 	Line  int
 	Name  string
-	Type  TypeDefinition
+	Type  Type
 	Value Expression
 }
 
@@ -65,7 +65,7 @@ type BlockStatement struct {
 }
 
 func (b *BlockStatement) String() string {
-	return fmt.Sprintf("(BlockStatement body: )")
+	return "(BlockStatement body: )"
 }
 
 type IfStatement struct {
@@ -95,6 +95,7 @@ type ReturnStatement struct {
 	Statement
 	Line  int
 	Value Expression
+	Type  interface{}
 }
 
 func (r *ReturnStatement) String() string {
