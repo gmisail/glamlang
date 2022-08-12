@@ -9,19 +9,24 @@ import (
 
 type Logical struct {
 	Expression
-	Line     int
+	NodeMetadata
 	Left     Expression
 	Right    Expression
 	Operator lexer.TokenType
 }
 
 func (l *Logical) String() string {
-	return fmt.Sprintf("(Logical op: %s, left: %s, right: %s)", lexer.TokenTypeToString(l.Operator), l.Left.String(), l.Right.String())
+	return fmt.Sprintf(
+		"(Logical op: %s, left: %s, right: %s)",
+		lexer.TokenTypeToString(l.Operator),
+		l.Left.String(),
+		l.Right.String(),
+	)
 }
 
 type Unary struct {
 	Expression
-	Line     int
+	NodeMetadata
 	Value    Expression
 	Operator lexer.TokenType
 }
@@ -32,7 +37,7 @@ func (u *Unary) String() string {
 
 type Binary struct {
 	Expression
-	Line     int
+	NodeMetadata
 	Left     Expression
 	Right    Expression
 	Operator lexer.TokenType
@@ -44,7 +49,7 @@ func (b *Binary) String() string {
 
 type Group struct {
 	Expression
-	Line  int
+	NodeMetadata
 	Value Expression
 }
 
@@ -54,7 +59,7 @@ func (g *Group) String() string {
 
 type FunctionExpression struct {
 	Expression
-	Line       int
+	NodeMetadata
 	Parameters []VariableDeclaration
 	Body       Statement
 	ReturnType Type
@@ -66,7 +71,7 @@ func (f *FunctionExpression) String() string {
 
 type VariableExpression struct {
 	Expression
-	Line  int
+	NodeMetadata
 	Value string
 }
 
@@ -76,7 +81,7 @@ func (v *VariableExpression) String() string {
 
 type FunctionCall struct {
 	Expression
-	Line      int
+	NodeMetadata
 	Callee    Expression
 	Arguments []Expression
 }
@@ -101,7 +106,7 @@ func (f *FunctionCall) String() string {
 
 type GetExpression struct {
 	Expression
-	Line   int
+	NodeMetadata
 	Name   string
 	Parent Expression
 }
@@ -112,7 +117,7 @@ func (g *GetExpression) String() string {
 
 type Literal struct {
 	Expression
-	Line  int
+	NodeMetadata
 	Value interface{}
 	Type  lexer.TokenType
 }

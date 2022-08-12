@@ -8,7 +8,7 @@ import (
 )
 
 /*
-	Returns true if the statement could be type checked successfully.
+Returns true if the statement could be type checked successfully.
 */
 func (tc *TypeChecker) CheckStatement(statement ast.Statement) error {
 	switch targetStatement := statement.(type) {
@@ -91,8 +91,8 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 }
 
 /*
-	Check if the condition of an if statement is a boolean, and that
-	its body type checks properly.
+Check if the condition of an if statement is a boolean, and that
+its body type checks properly.
 */
 func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) error {
 	conditionType, conditionErr := tc.CheckExpression(stat.Condition)
@@ -124,7 +124,7 @@ func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) error {
 }
 
 /*
-	Check if the condition is a boolean and that the body type checks properly.
+Check if the condition is a boolean and that the body type checks properly.
 */
 func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 	conditionType, conditionErr := tc.CheckExpression(stat.Condition)
@@ -202,7 +202,7 @@ func (tc *TypeChecker) checkReturnStatement(stat *ast.ReturnStatement) error {
 }
 
 /*
-	Check if block has a return statement.
+Check if block has a return statement.
 */
 func (tc *TypeChecker) hasReturnStatement(body *ast.BlockStatement) bool {
 	if len(body.Statements) <= 0 {
@@ -220,9 +220,12 @@ func (tc *TypeChecker) hasReturnStatement(body *ast.BlockStatement) bool {
 }
 
 /*
-	Returns if there is a return statement and an error if it exists.
+Returns if there is a return statement and an error if it exists.
 */
-func (tc *TypeChecker) checkLastReturnStatement(expectedType ast.Type, body ast.Statement) (bool, error) {
+func (tc *TypeChecker) checkLastReturnStatement(
+	expectedType ast.Type,
+	body ast.Statement,
+) (bool, error) {
 	/*
 		There are two options:
 
@@ -297,10 +300,13 @@ func (tc *TypeChecker) checkLastReturnStatement(expectedType ast.Type, body ast.
 }
 
 /*
-	Validate type of return statement in a single statement. Check for nested
-	return statements as well.
+Validate type of return statement in a single statement. Check for nested
+return statements as well.
 */
-func (tc *TypeChecker) checkStatementForReturns(expectedType ast.Type, statement ast.Statement) error {
+func (tc *TypeChecker) checkStatementForReturns(
+	expectedType ast.Type,
+	statement ast.Statement,
+) error {
 	switch statementType := statement.(type) {
 	case *ast.ReturnStatement:
 		returnType, err := tc.CheckExpression(statementType.Value)
@@ -332,9 +338,12 @@ func (tc *TypeChecker) checkStatementForReturns(expectedType ast.Type, statement
 }
 
 /*
-	Validate type of *every* return statement in a block.
+Validate type of *every* return statement in a block.
 */
-func (tc *TypeChecker) checkAllReturnStatements(expectedType ast.Type, body *ast.BlockStatement) error {
+func (tc *TypeChecker) checkAllReturnStatements(
+	expectedType ast.Type,
+	body *ast.BlockStatement,
+) error {
 	// if block has a return, it must be the LAST statement.
 	if tc.hasReturnStatement(body) {
 		isValid, err := tc.checkLastReturnStatement(expectedType, body)

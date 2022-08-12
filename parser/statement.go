@@ -39,11 +39,19 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 		}
 	}
 
-	return &ast.VariableDeclaration{Name: name.Literal, Type: variableType, Value: value, Line: name.Line}, nil
+	return &ast.VariableDeclaration{
+		Name:  name.Literal,
+		Type:  variableType,
+		Value: value,
+		Line:  name.Line,
+	}, nil
 }
 
 func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
-	identifier, identifierErr := p.Consume(lexer.IDENTIFIER, "Expected name after struct definition.")
+	identifier, identifierErr := p.Consume(
+		lexer.IDENTIFIER,
+		"Expected name after struct definition.",
+	)
 
 	if identifierErr != nil {
 		return nil, identifierErr
@@ -80,14 +88,21 @@ func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 			return nil, variableTypeErr
 		}
 
-		variables = append(variables, ast.VariableDeclaration{Name: variableName.Literal, Type: variableType, Value: nil})
+		variables = append(
+			variables,
+			ast.VariableDeclaration{Name: variableName.Literal, Type: variableType, Value: nil},
+		)
 
 		//	if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
 		//		break
 		//		}
 	}
 
-	return &ast.StructDeclaration{Name: identifier.Literal, Variables: variables, Line: identifier.Line}, nil
+	return &ast.StructDeclaration{
+		Name:      identifier.Literal,
+		Variables: variables,
+		Line:      identifier.Line,
+	}, nil
 }
 
 func (p *Parser) parseDeclaration() (ast.Statement, error) {
@@ -153,7 +168,12 @@ func (p *Parser) parseIfStatement() (ast.Statement, error) {
 		elseBranch = elseBranchStatement
 	}
 
-	return &ast.IfStatement{Condition: condition, Body: ifBranch, ElseBody: elseBranch, Line: line}, nil
+	return &ast.IfStatement{
+		Condition: condition,
+		Body:      ifBranch,
+		ElseBody:  elseBranch,
+		Line:      line,
+	}, nil
 }
 
 func (p *Parser) parseWhileStatement() (ast.Statement, error) {

@@ -15,7 +15,7 @@ func CreateContext() *Context {
 }
 
 /*
-	Looks up the type of a variable if it exists.
+Looks up the type of a variable if it exists.
 */
 func (c *Context) Find(name string) (bool, *ast.Type) {
 	isValid, variableType := c.environment.Find(name)
@@ -28,24 +28,24 @@ func (c *Context) Find(name string) (bool, *ast.Type) {
 }
 
 /*
-	Adds variable to the current scope.
+Adds variable to the current scope.
 */
 func (c *Context) Add(variableName string, variableType *ast.Type) bool {
 	return c.environment.Add(variableName, variableType)
 }
 
 /*
-	Creates and enters a new environment.
+Creates and enters a new environment.
 */
 func (c *Context) EnterScope() {
 	c.environment = CreateEnvironment(c.environment)
 }
 
 /*
-	Pops the current environment and replaces it
-	with the parent. If the parent environment does
-	no exist, i.e. we are already in the global scope,
-	then just ignore it.
+Pops the current environment and replaces it
+with the parent. If the parent environment does
+no exist, i.e. we are already in the global scope,
+then just ignore it.
 */
 func (c *Context) ExitScope() {
 	if c.environment.Parent == nil {

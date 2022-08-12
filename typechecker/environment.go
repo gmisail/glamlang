@@ -13,11 +13,15 @@ type Environment struct {
 }
 
 func CreateEnvironment(parent *Environment) *Environment {
-	return &Environment{Parent: parent, Values: make(map[string]*ast.Type), Types: make(map[string]*Environment)}
+	return &Environment{
+		Parent: parent,
+		Values: make(map[string]*ast.Type),
+		Types:  make(map[string]*Environment),
+	}
 }
 
 /*
-	Looks up the type of a variable if it exists.
+Looks up the type of a variable if it exists.
 */
 func (e *Environment) Find(name string) (bool, *ast.Type) {
 	fmt.Println(name, "in", e.Values)
@@ -35,8 +39,8 @@ func (e *Environment) Find(name string) (bool, *ast.Type) {
 }
 
 /*
-	Adds a variable to the context. Returns false
-	if the variable already exists in the current scope.
+Adds a variable to the context. Returns false
+if the variable already exists in the current scope.
 */
 func (e *Environment) Add(variableName string, variableType *ast.Type) bool {
 	exists, _ := e.Find(variableName)
@@ -51,7 +55,7 @@ func (e *Environment) Add(variableName string, variableType *ast.Type) bool {
 }
 
 /*
-	Returns if a custom type exists in the current context.
+Returns if a custom type exists in the current context.
 */
 func (e *Environment) CustomTypeExists(typeName string) bool {
 	if _, ok := e.Types[typeName]; ok {
@@ -62,9 +66,9 @@ func (e *Environment) CustomTypeExists(typeName string) bool {
 }
 
 /*
-	Adds a custom type (i.e. struct) if it does not exist already. Returns
-	true if it was added as well as an environment which represents the
-	variables within the struct.
+Adds a custom type (i.e. struct) if it does not exist already. Returns
+true if it was added as well as an environment which represents the
+variables within the struct.
 */
 func (e *Environment) AddType(typeName string) (bool, *Environment) {
 	if e.CustomTypeExists(typeName) {

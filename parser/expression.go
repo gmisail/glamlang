@@ -10,15 +10,19 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 	token := p.CurrentToken()
 
 	if p.MatchToken(lexer.FALSE) {
-		return &ast.Literal{Value: false, Type: lexer.BOOL, Line: token.Line}, nil
+		return &ast.Literal{
+			NodeMetadata: ast.CreateMetadata(token.Line),
+			Value:        false,
+			Type:         lexer.BOOL,
+		}, nil
 	} else if p.MatchToken(lexer.TRUE) {
-		return &ast.Literal{Value: true, Type: lexer.BOOL, Line: token.Line}, nil
+		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: true, Type: lexer.BOOL}, nil
 	} else if p.MatchToken(lexer.NULL) {
-		return &ast.Literal{Value: nil, Type: lexer.NULL, Line: token.Line}, nil
+		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: nil, Type: lexer.NULL}, nil
 	} else if p.MatchToken(lexer.STRING, lexer.INT, lexer.FLOAT) {
-		return &ast.Literal{Value: token.Literal, Type: token.Type, Line: token.Line}, nil
+		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: token.Literal, Type: token.Type}, nil
 	} else if p.MatchToken(lexer.IDENTIFIER) {
-		return &ast.VariableExpression{Value: p.PreviousToken().Literal, Line: token.Line}, nil
+		return &ast.VariableExpression{NodeMetadata: ast.CreateMetadata(token.Line), Value: p.PreviousToken().Literal}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
 		expr, _ := p.parseExpression()
 		//benabenabenabenabenabenabenabenabenabenabenabenabenabena
@@ -29,10 +33,16 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 			return nil, err
 		}
 
-		return &ast.Group{Value: expr, Line: token.Line}, nil
+		return &ast.Group{NodeMetadata: ast.CreateMetadata(token.Line), Value: expr}, nil
 	}
 
-	return nil, &ParseError{message: fmt.Sprintf("Unexpected token: %s", lexer.TokenTypeToString(p.CurrentToken().Type)), line: p.CurrentToken().Line}
+	return nil, &ParseError{
+		message: fmt.Sprintf(
+			"Unexpected token: %s",
+			lexer.TokenTypeToString(p.CurrentToken().Type),
+		),
+		line: p.CurrentToken().Line,
+	}
 }
 
 func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expression, error) {
@@ -50,7 +60,10 @@ func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expr
 		// if the next token is ), then there are no more arguments
 		// and we shouldn't expect to see another comma.
 		if p.CurrentToken().Type != lexer.R_PAREN {
-			_, commaErr := p.Consume(lexer.COMMA, "Expected comma after arguments in function call.")
+			_, commaErr := p.Consume(
+				lexer.COMMA,
+				"Expected comma after arguments in function call.",
+			)
 
 			if commaErr != nil {
 				return nil, commaErr
@@ -64,7 +77,11 @@ func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expr
 		return nil, rightParenErr
 	}
 
-	return &ast.FunctionCall{Callee: callee, Arguments: arguments, Line: startLine}, nil
+	return &ast.FunctionCall{
+		Callee:       callee,
+		Arguments:    arguments,
+		NodeMetadata: ast.CreateMetadata(startLine),
+	}, nil
 }
 
 func (p *Parser) parseCall() (ast.Expression, error) {
@@ -88,7 +105,7 @@ func (p *Parser) parseCall() (ast.Expression, error) {
 			// TODO: handle me
 			line := p.PreviousToken().Line
 			name, _ := p.Consume(lexer.IDENTIFIER, "Expected identifier after '.'")
-			expr = &ast.GetExpression{Name: name.Literal, Parent: expr, Line: line}
+			expr = &ast.GetExpression{Name: name.Literal, Parent: expr, NodeMetadata: ast.CreateMetadata(line)}
 		} else {
 			break
 		}
@@ -165,7 +182,12 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 			return nil, statErr
 		}
 
-		return &ast.FunctionExpression{Parameters: parameters, Body: body, ReturnType: returnType, Line: line}, nil
+		return &ast.FunctionExpression{
+			Parameters:   parameters,
+			Body:         body,
+			ReturnType:   returnType,
+			NodeMetadata: ast.CreateMetadata(line),
+		}, nil
 	}
 
 	return p.parseCall()
@@ -180,7 +202,11 @@ func (p *Parser) parseUnary() (ast.Expression, error) {
 			return nil, err
 		}
 
-		return &ast.Unary{Value: expr, Operator: op.Type, Line: op.Line}, nil
+		return &ast.Unary{
+			Value:        expr,
+			Operator:     op.Type,
+			NodeMetadata: ast.CreateMetadata(op.Line),
+		}, nil
 	}
 
 	return p.parseFunction()
@@ -201,7 +227,12 @@ func (p *Parser) parseFactor() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
+		expr = &ast.Binary{
+			Left:         expr,
+			Right:        rightExpr,
+			Operator:     op.Type,
+			NodeMetadata: ast.CreateMetadata(op.Line),
+		}
 	}
 
 	return expr, nil
@@ -222,7 +253,12 @@ func (p *Parser) parseTerm() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
+		expr = &ast.Binary{
+			Left:         expr,
+			Right:        rightExpr,
+			Operator:     op.Type,
+			NodeMetadata: ast.CreateMetadata(op.Line),
+		}
 	}
 
 	return expr, nil
@@ -243,7 +279,12 @@ func (p *Parser) parseComparison() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
+		expr = &ast.Binary{
+			Left:         expr,
+			Right:        rightExpr,
+			Operator:     op.Type,
+			NodeMetadata: ast.CreateMetadata(op.Line),
+		}
 	}
 
 	return expr, nil
@@ -264,7 +305,12 @@ func (p *Parser) parseEquality() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Binary{Left: expr, Right: rightExpr, Operator: op.Type, Line: op.Line}
+		expr = &ast.Binary{
+			Left:         expr,
+			Right:        rightExpr,
+			Operator:     op.Type,
+			NodeMetadata: ast.CreateMetadata(op.Line),
+		}
 	}
 
 	return expr, nil
@@ -285,7 +331,12 @@ func (p *Parser) parseLogicalAnd() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type, Line: op.Line}
+		expr = &ast.Logical{
+			Left:         expr,
+			Right:        right,
+			Operator:     op.Type,
+			NodeMetadata: ast.CreateMetadata(op.Line),
+		}
 	}
 
 	return expr, nil
@@ -306,7 +357,12 @@ func (p *Parser) parseLogicalOr() (ast.Expression, error) {
 			return nil, rightErr
 		}
 
-		expr = &ast.Logical{Left: expr, Right: right, Operator: op.Type, Line: op.Line}
+		expr = &ast.Logical{
+			Left:         expr,
+			Right:        right,
+			Operator:     op.Type,
+			NodeMetadata: ast.CreateMetadata(op.Line),
+		}
 	}
 
 	return expr, nil

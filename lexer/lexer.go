@@ -236,7 +236,12 @@ func (l *Lexer) ScanToken() bool {
 	case '/':
 		l.AddKeyword(DIV)
 	case '=':
-		l.AddKeyword(l.ScanConditional([]TokenPair{{char: '=', tokenType: EQUALITY}, {char: '>', tokenType: THICK_ARROW}}, EQUAL))
+		l.AddKeyword(
+			l.ScanConditional(
+				[]TokenPair{{char: '=', tokenType: EQUALITY}, {char: '>', tokenType: THICK_ARROW}},
+				EQUAL,
+			),
+		)
 	case '>':
 		l.AddKeyword(l.ScanConditional([]TokenPair{{char: '=', tokenType: GT_EQ}}, GT))
 	case '<':

@@ -20,7 +20,12 @@ func (v *VariableDeclaration) String() string {
 		value = v.Value.String()
 	}
 
-	return fmt.Sprintf("(VariableDeclaration name: %s, type: %s, value: %s)", v.Name, v.Type.String(), value)
+	return fmt.Sprintf(
+		"(VariableDeclaration name: %s, type: %s, value: %s)",
+		v.Name,
+		v.Type.String(),
+		value,
+	)
 }
 
 type StructDeclaration struct {
@@ -77,7 +82,11 @@ type IfStatement struct {
 }
 
 func (i *IfStatement) String() string {
-	return fmt.Sprintf("(IfStatement condition: %s, body: %s)", i.Condition.String(), i.Body.String())
+	return fmt.Sprintf(
+		"(IfStatement condition: %s, body: %s)",
+		i.Condition.String(),
+		i.Body.String(),
+	)
 }
 
 type WhileStatement struct {
@@ -88,7 +97,11 @@ type WhileStatement struct {
 }
 
 func (w *WhileStatement) String() string {
-	return fmt.Sprintf("(WhileStatement condition: %s, body: %s)", w.Condition.String(), w.Body.String())
+	return fmt.Sprintf(
+		"(WhileStatement condition: %s, body: %s)",
+		w.Condition.String(),
+		w.Body.String(),
+	)
 }
 
 type ReturnStatement struct {

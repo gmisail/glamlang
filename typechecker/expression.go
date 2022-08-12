@@ -9,8 +9,8 @@ import (
 )
 
 /*
-	Checks the type of the expression and, if valid, returns true and its type. If there
-	was an error while type checking, it will return false, nil.
+Checks the type of the expression and, if valid, returns true and its type. If there
+was an error while type checking, it will return false, nil.
 */
 func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 	switch exprType := expr.(type) {
@@ -230,7 +230,10 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 		}
 
 		if !valueType.Equals(ast.CreateTypeFromLiteral(lexer.BOOL)) {
-			message := fmt.Sprintf("Expected type in 'not' expression to be bool, instead got incompatible type %s.", valueType.String())
+			message := fmt.Sprintf(
+				"Expected type in 'not' expression to be bool, instead got incompatible type %s.",
+				valueType.String(),
+			)
 
 			return nil, CreateTypeError(message, expr.Line)
 		}
@@ -244,8 +247,12 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 			return nil, valueErr
 		}
 
-		if !valueType.Equals(ast.CreateTypeFromLiteral(lexer.INT)) && !valueType.Equals(ast.CreateTypeFromLiteral(lexer.FLOAT)) {
-			message := fmt.Sprintf("Expected type in negation to be int or float, instead got incompatible type %s.", valueType.String())
+		if !valueType.Equals(ast.CreateTypeFromLiteral(lexer.INT)) &&
+			!valueType.Equals(ast.CreateTypeFromLiteral(lexer.FLOAT)) {
+			message := fmt.Sprintf(
+				"Expected type in negation to be int or float, instead got incompatible type %s.",
+				valueType.String(),
+			)
 
 			return nil, CreateTypeError(message, expr.Line)
 		}
@@ -273,14 +280,20 @@ func (tc *TypeChecker) checkLogical(expr *ast.Logical) (ast.Type, error) {
 
 	if !leftType.Equals(boolType) {
 		return nil, CreateTypeError(
-			fmt.Sprintf("Expected the left side of logical statement to be of type bool, got %s.", leftType.String()),
+			fmt.Sprintf(
+				"Expected the left side of logical statement to be of type bool, got %s.",
+				leftType.String(),
+			),
 			expr.Line,
 		)
 	}
 
 	if !rightType.Equals(boolType) {
 		return nil, CreateTypeError(
-			fmt.Sprintf("Expected the right side of logical statement to be of type bool, got %s.", rightType.String()),
+			fmt.Sprintf(
+				"Expected the right side of logical statement to be of type bool, got %s.",
+				rightType.String(),
+			),
 			expr.Line,
 		)
 	}
