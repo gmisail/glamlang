@@ -40,10 +40,10 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 	}
 
 	return &ast.VariableDeclaration{
-		Name:  name.Literal,
-		Type:  variableType,
-		Value: value,
-		Line:  name.Line,
+		Name:         name.Literal,
+		Type:         variableType,
+		Value:        value,
+		NodeMetadata: ast.CreateMetadata(name.Line),
 	}, nil
 }
 
@@ -92,16 +92,12 @@ func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 			variables,
 			ast.VariableDeclaration{Name: variableName.Literal, Type: variableType, Value: nil},
 		)
-
-		//	if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
-		//		break
-		//		}
 	}
 
 	return &ast.StructDeclaration{
-		Name:      identifier.Literal,
-		Variables: variables,
-		Line:      identifier.Line,
+		Name:         identifier.Literal,
+		Variables:    variables,
+		NodeMetadata: ast.CreateMetadata(identifier.Line),
 	}, nil
 }
 
@@ -118,7 +114,6 @@ func (p *Parser) parseBlockStatement() (ast.Statement, error) {
 
 	openParen := p.PreviousToken()
 
-	// TODO: make function for "check"
 	for p.CurrentToken().Type != lexer.R_BRACE /*&& is not at end */ {
 		statement, statementErr := p.parseDeclaration()
 
@@ -139,7 +134,10 @@ func (p *Parser) parseBlockStatement() (ast.Statement, error) {
 		return nil, rightBraceErr
 	}
 
-	return &ast.BlockStatement{Statements: statements, Line: openParen.Line}, nil
+	return &ast.BlockStatement{
+		Statements:   statements,
+		NodeMetadata: ast.CreateMetadata(openParen.Line),
+	}, nil
 }
 
 func (p *Parser) parseIfStatement() (ast.Statement, error) {
@@ -169,10 +167,10 @@ func (p *Parser) parseIfStatement() (ast.Statement, error) {
 	}
 
 	return &ast.IfStatement{
-		Condition: condition,
-		Body:      ifBranch,
-		ElseBody:  elseBranch,
-		Line:      line,
+		Condition:    condition,
+		Body:         ifBranch,
+		ElseBody:     elseBranch,
+		NodeMetadata: ast.CreateMetadata(line),
 	}, nil
 }
 
@@ -190,7 +188,11 @@ func (p *Parser) parseWhileStatement() (ast.Statement, error) {
 		return nil, bodyErr
 	}
 
-	return &ast.WhileStatement{Condition: condition, Body: body, Line: line}, nil
+	return &ast.WhileStatement{
+		Condition:    condition,
+		Body:         body,
+		NodeMetadata: ast.CreateMetadata(line),
+	}, nil
 }
 
 func (p *Parser) parseExpressionStatement() (ast.Statement, error) {
@@ -201,7 +203,7 @@ func (p *Parser) parseExpressionStatement() (ast.Statement, error) {
 		return nil, err
 	}
 
-	return &ast.ExpressionStatement{Value: expression, Line: line}, err
+	return &ast.ExpressionStatement{Value: expression, NodeMetadata: ast.CreateMetadata(line)}, err
 }
 
 func (p *Parser) parseReturnStatement() (ast.Statement, error) {
@@ -212,7 +214,7 @@ func (p *Parser) parseReturnStatement() (ast.Statement, error) {
 		return nil, valueErr
 	}
 
-	return &ast.ReturnStatement{Value: value, Line: line}, nil
+	return &ast.ReturnStatement{Value: value, NodeMetadata: ast.CreateMetadata(line)}, nil
 }
 
 func (p *Parser) parseStatement() (ast.Statement, error) {

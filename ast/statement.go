@@ -7,7 +7,7 @@ import (
 
 type VariableDeclaration struct {
 	Statement
-	Line  int
+	NodeMetadata
 	Name  string
 	Type  Type
 	Value Expression
@@ -30,7 +30,7 @@ func (v *VariableDeclaration) String() string {
 
 type StructDeclaration struct {
 	Statement
-	Line      int
+	NodeMetadata
 	Name      string
 	Variables []VariableDeclaration
 }
@@ -55,7 +55,7 @@ func (s *StructDeclaration) String() string {
 
 type ExpressionStatement struct {
 	Statement
-	Line  int
+	NodeMetadata
 	Value Expression
 }
 
@@ -65,7 +65,7 @@ func (e *ExpressionStatement) String() string {
 
 type BlockStatement struct {
 	Statement
-	Line       int
+	NodeMetadata
 	Statements []Statement
 }
 
@@ -75,7 +75,7 @@ func (b *BlockStatement) String() string {
 
 type IfStatement struct {
 	Statement
-	Line      int
+	NodeMetadata
 	Condition Expression
 	Body      Statement
 	ElseBody  Statement
@@ -91,7 +91,7 @@ func (i *IfStatement) String() string {
 
 type WhileStatement struct {
 	Statement
-	Line      int
+	NodeMetadata
 	Condition Expression
 	Body      Statement
 }
@@ -106,7 +106,7 @@ func (w *WhileStatement) String() string {
 
 type ReturnStatement struct {
 	Statement
-	Line  int
+	NodeMetadata
 	Value Expression
 	Type  interface{}
 }
