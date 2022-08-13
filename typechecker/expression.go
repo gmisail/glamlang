@@ -116,6 +116,8 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, er
 			return nil, CreateTypeError(message, expr.Line)
 		}
 
+		expr.Type = *memberType
+
 		return *memberType, nil
 	case *ast.FunctionType:
 		return nil, CreateTypeError(
@@ -173,6 +175,8 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (ast.Type, erro
 			}
 		}
 
+		expr.Type = functionInstance.ReturnType
+
 		return functionInstance.ReturnType, nil
 	}
 
@@ -204,6 +208,10 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 		return nil, CreateTypeError(message, expr.Line)
 	}
 
+	// TODO: add rules depending on the operation
+	// e.g. true + true --> invalid
+	// 		true < false --> invalid
+
 	switch expr.Operator {
 	case lexer.LT,
 		lexer.LT_EQ,
@@ -211,8 +219,11 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 		lexer.GT_EQ,
 		lexer.EQUALITY,
 		lexer.NOT_EQUAL:
-		return ast.CreateTypeFromLiteral(lexer.BOOL), nil
+		boolType := ast.CreateTypeFromLiteral(lexer.BOOL)
+		expr.Type = boolType
+		return boolType, nil
 	case lexer.ADD, lexer.SUB, lexer.MULT, lexer.DIV:
+		expr.Type = leftType
 		return leftType, nil
 	}
 
@@ -238,6 +249,8 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 			return nil, CreateTypeError(message, expr.Line)
 		}
 
+		expr.Type = valueType
+
 		return valueType, nil
 	case lexer.SUB:
 		// -(number)
@@ -256,6 +269,8 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 
 			return nil, CreateTypeError(message, expr.Line)
 		}
+
+		expr.Type = valueType
 
 		return valueType, nil
 	}
@@ -297,6 +312,8 @@ func (tc *TypeChecker) checkLogical(expr *ast.Logical) (ast.Type, error) {
 			expr.Line,
 		)
 	}
+
+	expr.Type = boolType
 
 	return boolType, nil
 }
