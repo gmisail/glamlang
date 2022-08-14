@@ -252,7 +252,7 @@ func (tc *TypeChecker) checkLastReturnStatement(
 		lastStatement := stat.Statements[len(stat.Statements)-1]
 
 		if statement, ok := lastStatement.(*ast.ReturnStatement); ok {
-			returnType := statement.Type.(ast.Type)
+			returnType := statement.Value.GetType().(ast.Type)
 
 			if !expectedType.Equals(returnType) {
 				return false, CreateTypeError(
@@ -309,10 +309,20 @@ func (tc *TypeChecker) checkStatementForReturns(
 ) error {
 	switch statementType := statement.(type) {
 	case *ast.ReturnStatement:
-		returnType, err := tc.CheckExpression(statementType.Value)
+		returnType := statementType.Value.GetType()
+
+		if returnType == nil {
+			return CreateTypeError(
+				fmt.Sprintf("Invalid return type."),
+				statementType.Value.GetLine(),
+			)
+		}
 
 		if !expectedType.Equals(returnType) {
-			return err
+			return CreateTypeError(
+				fmt.Sprintf("Expected incorrect return type."),
+				statementType.Value.GetLine(),
+			)
 		}
 	case *ast.IfStatement:
 		if err := tc.checkStatementForReturns(expectedType, statementType.Body); err != nil {

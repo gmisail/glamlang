@@ -1,8 +1,6 @@
 package typechecker
 
 import (
-	"fmt"
-
 	"github.com/gmisail/glamlang/ast"
 )
 
@@ -51,12 +49,6 @@ func (c *Context) ExitScope() {
 	if c.environment.Parent == nil {
 		return
 	}
-
-	for k := range c.environment.Values {
-		fmt.Println("pop", k)
-	}
-
-	fmt.Println("pop scope")
 
 	c.environment = c.environment.Parent
 }

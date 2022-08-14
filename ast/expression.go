@@ -24,6 +24,14 @@ func (l *Logical) String() string {
 	)
 }
 
+func (l *Logical) GetLine() int {
+	return l.NodeMetadata.Line
+}
+
+func (l *Logical) GetType() Type {
+	return l.NodeMetadata.Type
+}
+
 type Unary struct {
 	Expression
 	NodeMetadata
@@ -33,6 +41,14 @@ type Unary struct {
 
 func (u *Unary) String() string {
 	return fmt.Sprintf("(Unary %s %s)", lexer.TokenTypeToString(u.Operator), u.Value.String())
+}
+
+func (u *Unary) GetLine() int {
+	return u.NodeMetadata.Line
+}
+
+func (u *Unary) GetType() Type {
+	return u.NodeMetadata.Type
 }
 
 type Binary struct {
@@ -47,6 +63,14 @@ func (b *Binary) String() string {
 	return fmt.Sprintf("(Binary %s %s)", b.Left.String(), b.Right.String())
 }
 
+func (b *Binary) GetLine() int {
+	return b.NodeMetadata.Line
+}
+
+func (b *Binary) GetType() Type {
+	return b.NodeMetadata.Type
+}
+
 type Group struct {
 	Expression
 	NodeMetadata
@@ -55,6 +79,14 @@ type Group struct {
 
 func (g *Group) String() string {
 	return fmt.Sprintf("(Group %s)", g.Value.String())
+}
+
+func (g *Group) GetLine() int {
+	return g.NodeMetadata.Line
+}
+
+func (g *Group) GetType() Type {
+	return g.NodeMetadata.Type
 }
 
 type FunctionExpression struct {
@@ -69,6 +101,14 @@ func (f *FunctionExpression) String() string {
 	return fmt.Sprintf("(FunctionExpression body: %s)", f.Body.String())
 }
 
+func (f *FunctionExpression) GetLine() int {
+	return f.NodeMetadata.Line
+}
+
+func (f *FunctionExpression) GetType() Type {
+	return f.NodeMetadata.Type
+}
+
 type VariableExpression struct {
 	Expression
 	NodeMetadata
@@ -77,6 +117,14 @@ type VariableExpression struct {
 
 func (v *VariableExpression) String() string {
 	return fmt.Sprintf("(VariableExpression %s)", v.Value)
+}
+
+func (v *VariableExpression) GetLine() int {
+	return v.NodeMetadata.Line
+}
+
+func (v *VariableExpression) GetType() Type {
+	return v.NodeMetadata.Type
 }
 
 type FunctionCall struct {
@@ -104,6 +152,14 @@ func (f *FunctionCall) String() string {
 	return builder.String()
 }
 
+func (f *FunctionCall) GetLine() int {
+	return f.NodeMetadata.Line
+}
+
+func (f *FunctionCall) GetType() Type {
+	return f.NodeMetadata.Type
+}
+
 type GetExpression struct {
 	Expression
 	NodeMetadata
@@ -115,13 +171,29 @@ func (g *GetExpression) String() string {
 	return fmt.Sprintf("(Get name: %s, parent: %s)", g.Name, g.Parent.String())
 }
 
+func (g *GetExpression) GetLine() int {
+	return g.NodeMetadata.Line
+}
+
+func (g *GetExpression) GetType() Type {
+	return g.NodeMetadata.Type
+}
+
 type Literal struct {
 	Expression
 	NodeMetadata
-	Value interface{}
-	Type  lexer.TokenType
+	Value       interface{}
+	LiteralType lexer.TokenType
 }
 
 func (l *Literal) String() string {
 	return fmt.Sprintf("(Literal %s)", l.Value)
+}
+
+func (l *Literal) GetLine() int {
+	return l.NodeMetadata.Line
+}
+
+func (l *Literal) GetType() Type {
+	return l.NodeMetadata.Type
 }

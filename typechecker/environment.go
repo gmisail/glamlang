@@ -1,8 +1,6 @@
 package typechecker
 
 import (
-	"fmt"
-
 	"github.com/gmisail/glamlang/ast"
 )
 
@@ -24,8 +22,6 @@ func CreateEnvironment(parent *Environment) *Environment {
 Looks up the type of a variable if it exists.
 */
 func (e *Environment) Find(name string) (bool, *ast.Type) {
-	fmt.Println(name, "in", e.Values)
-
 	// check the current scope
 	if variableType, ok := e.Values[name]; ok {
 		return true, variableType

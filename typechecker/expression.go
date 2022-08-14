@@ -15,7 +15,11 @@ was an error while type checking, it will return false, nil.
 func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 	switch exprType := expr.(type) {
 	case *ast.Literal:
-		return ast.CreateTypeFromLiteral(exprType.Type), nil // literals always check successfully
+		literalType := ast.CreateTypeFromLiteral(exprType.LiteralType)
+		exprType.Type = literalType
+
+		// literals always check successfully
+		return literalType, nil
 	case *ast.VariableExpression:
 		targetExists, targetType := tc.context.Find(exprType.Value)
 
@@ -44,6 +48,11 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 		}
 
 		bodyErr := tc.CheckStatement(exprType.Body)
+
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
+
 		returnType := exprType.ReturnType
 		hasReturn, returnErr := tc.checkLastReturnStatement(returnType, exprType.Body)
 
@@ -62,10 +71,6 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 		}
 
 		tc.context.ExitScope()
-
-		if bodyErr != nil {
-			return nil, bodyErr
-		}
 
 		return &ast.FunctionType{Parameters: parameters, ReturnType: exprType.ReturnType}, nil
 	case *ast.FunctionCall:
@@ -221,9 +226,11 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 		lexer.NOT_EQUAL:
 		boolType := ast.CreateTypeFromLiteral(lexer.BOOL)
 		expr.Type = boolType
+
 		return boolType, nil
 	case lexer.ADD, lexer.SUB, lexer.MULT, lexer.DIV:
 		expr.Type = leftType
+
 		return leftType, nil
 	}
 

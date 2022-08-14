@@ -1,7 +1,7 @@
 package typechecker
 
 import (
-	"fmt"
+	//	"fmt"
 	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/ast"
 )
@@ -20,12 +20,9 @@ func (tc *TypeChecker) CheckAll(statements []ast.Statement) bool {
 	for _, s := range statements {
 		err := tc.CheckStatement(s)
 
-		if err == nil {
-			fmt.Printf("VALID: %s\n", s.String())
-		} else {
+		if err != nil {
 			color.Red(err.Error())
-
-			fmt.Printf("INVALID: %s\n", s.String())
+			//fmt.Printf("INVALID: %s\n", s.String())
 		}
 	}
 

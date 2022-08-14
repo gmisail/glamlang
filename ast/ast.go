@@ -1,20 +1,22 @@
 package ast
 
+type Type interface {
+	Equals(Type) bool
+	String() string
+}
+
 type Node interface {
 	String() string
+	GetLine() int
 }
 
 type Expression interface {
 	Node
+	GetType() Type
 }
 
 type Statement interface {
 	Node
-}
-
-type Type interface {
-	Node
-	Equals(Type) bool
 }
 
 type NodeMetadata struct {

@@ -40,5 +40,5 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
     if bugs == 0
         return 0
 
-	return bugs * bunny
+	return bugs * bunny 
 }

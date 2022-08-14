@@ -13,14 +13,14 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		return &ast.Literal{
 			NodeMetadata: ast.CreateMetadata(token.Line),
 			Value:        false,
-			Type:         lexer.BOOL,
+			LiteralType:  lexer.BOOL,
 		}, nil
 	} else if p.MatchToken(lexer.TRUE) {
-		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: true, Type: lexer.BOOL}, nil
+		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: true, LiteralType: lexer.BOOL}, nil
 	} else if p.MatchToken(lexer.NULL) {
-		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: nil, Type: lexer.NULL}, nil
+		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: nil, LiteralType: lexer.NULL}, nil
 	} else if p.MatchToken(lexer.STRING, lexer.INT, lexer.FLOAT) {
-		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: token.Literal, Type: token.Type}, nil
+		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: token.Literal, LiteralType: token.Type}, nil
 	} else if p.MatchToken(lexer.IDENTIFIER) {
 		return &ast.VariableExpression{NodeMetadata: ast.CreateMetadata(token.Line), Value: p.PreviousToken().Literal}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
