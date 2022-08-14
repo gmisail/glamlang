@@ -42,3 +42,23 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
 
 	return bugs * bunny 
 }
+
+struct Album {
+	name: string
+	artist: string
+	song: string
+}
+
+let play_song : (string, Album) -> bool =
+fun (song: string, album: Album): bool => {
+	if album.song != song {
+		return false
+	}
+	
+	return true
+}
+
+let a : Album
+let song : string = "AMAZING"
+play_song(song, a)
+play_song(a, song)

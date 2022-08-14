@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
+	"github.com/martinusso/inflect"
 )
 
 /*
@@ -154,7 +155,7 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (ast.Type, erro
 			// TODO: diff the two functions, i.e. what was expected vs. what it got
 
 			message := fmt.Sprintf(
-				"Function call has %d arguments, expected %d.",
+				"Function call has %d arguments, got %d.",
 				len(functionInstance.Parameters),
 				len(expr.Arguments),
 			)
@@ -171,7 +172,9 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (ast.Type, erro
 
 			if !param.Equals(argType) {
 				message := fmt.Sprintf(
-					"Expected type %s, got %s.",
+					"Expected type of %d%s argument to be %s, got %s.",
+					i+1,
+					inflect.Ordinal(i+1),
 					param.String(),
 					argType.String(),
 				)

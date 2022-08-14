@@ -15,7 +15,7 @@ type VariableType struct {
 }
 
 func (v *VariableType) String() string {
-	return fmt.Sprintf("(VariableType base: %s)", v.Base)
+	return v.Base
 }
 
 type FunctionType struct {
