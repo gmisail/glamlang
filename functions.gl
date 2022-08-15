@@ -43,11 +43,6 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
 	return bugs * bunny 
 }
 
-struct Album {
-	name: string
-	artist: string
-	song: string
-}
 
 let play_song : (string, Album) -> bool =
 fun (song: string, album: Album): bool => {

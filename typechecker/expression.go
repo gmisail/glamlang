@@ -51,6 +51,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 		bodyErr := tc.CheckStatement(exprType.Body)
 
 		if bodyErr != nil {
+			tc.context.ExitScope()
 			return nil, bodyErr
 		}
 
@@ -58,16 +59,19 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 		hasReturn, returnErr := tc.checkLastReturnStatement(returnType, exprType.Body)
 
 		if !hasReturn || returnErr != nil {
+			tc.context.ExitScope()
 			return nil, returnErr
 		}
 
 		if body, ok := exprType.Body.(*ast.BlockStatement); ok {
 			if returnErr := tc.checkAllReturnStatements(returnType, body); returnErr != nil {
+				tc.context.ExitScope()
 				return nil, returnErr
 			}
 		}
 
 		if returnErr != nil {
+			tc.context.ExitScope()
 			return nil, returnErr
 		}
 

@@ -58,6 +58,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 		equal to the r-value type.
 	*/
 	variableType := v.Type
+
 	isValidVariable := tc.context.Add(v.Name, &variableType)
 
 	if !isValidVariable {
