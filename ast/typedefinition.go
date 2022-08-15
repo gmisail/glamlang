@@ -15,7 +15,13 @@ type VariableType struct {
 }
 
 func (v *VariableType) String() string {
-	return v.Base
+	optionalSuffix := ""
+
+	if v.Optional {
+		optionalSuffix = "?"
+	}
+
+	return fmt.Sprintf("%s%s", v.Base, optionalSuffix)
 }
 
 type FunctionType struct {

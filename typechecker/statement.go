@@ -80,7 +80,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 
 	if !isEqual {
 		message := fmt.Sprintf(
-			"Invalid type in variable declaration. Expected %s but got %s.\n",
+			"Invalid type in variable declaration. Expected %s but got %s.",
 			variableType.String(),
 			valueType.String(),
 		)

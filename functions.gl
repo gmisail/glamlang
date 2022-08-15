@@ -43,7 +43,6 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
 	return bugs * bunny 
 }
 
-
 let play_song : (string, Album) -> bool =
 fun (song: string, album: Album): bool => {
 	if album.song != song {
@@ -57,3 +56,5 @@ let a : Album
 let song : string = "AMAZING"
 play_song(song, a)
 play_song(a, song)
+
+let opt : int? = mul(10, 10)
