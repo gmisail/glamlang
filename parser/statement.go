@@ -47,17 +47,8 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 	}, nil
 }
 
-func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
-	identifier, identifierErr := p.Consume(
-		lexer.IDENTIFIER,
-		"Expected name after struct definition.",
-	)
-
-	if identifierErr != nil {
-		return nil, identifierErr
-	}
-
-	variables := make([]ast.VariableDeclaration, 0)
+func (p *Parser) parseRecord() (ast.Type, error) {
+	variables := make(map[string]ast.Type)
 
 	_, leftBraceErr := p.Consume(lexer.L_BRACE, "Expected '{' when declaring struct.")
 
@@ -88,15 +79,75 @@ func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 			return nil, variableTypeErr
 		}
 
-		variables = append(
-			variables,
-			ast.VariableDeclaration{Name: variableName.Literal, Type: variableType, Value: nil},
-		)
+		variables[variableName.Literal] = variableType
+	}
+
+	return &ast.RecordType{Variables: variables}, nil
+}
+
+func (p *Parser) parseRecordIntersection() (ast.Type, error) {
+	/*
+		{ x: int } & { y: int }
+		Node & { t: Type }
+		(Node) & {t : Type}
+		Node & ({t : Type} & Statement)
+	*/
+
+	var leftRecord ast.Type = nil
+
+	if p.MatchToken(lexer.L_PAREN) {
+		leftRecord, _ = p.parseRecordIntersection()
+		// TODO: handle err
+
+		p.Consume(lexer.R_PAREN, "Expected right parenthesis.")
+	} else if p.MatchToken(lexer.IDENTIFIER) {
+		leftRecord = &ast.VariableType{Base: p.PreviousToken().Literal, SubType: nil, Optional: false}
+	} else {
+		leftRecord, _ = p.parseRecord()
+	}
+
+	if leftRecord == nil {
+		// TODO: handle err
+	}
+
+	// handle binary parsing, i.e. LEFT (& <record intersection>)?
+
+	return nil, nil
+}
+
+func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
+	identifier, identifierErr := p.Consume(
+		lexer.IDENTIFIER,
+		"Expected name after struct definition.",
+	)
+
+	if identifierErr != nil {
+		return nil, identifierErr
+	}
+
+	_, equalsErr := p.Consume(lexer.EQUAL, "Expected '=' after type name.")
+
+	if equalsErr != nil {
+		return nil, equalsErr
+	}
+
+	/*
+		type <identifier> = <type intersections>
+
+		type Node = { line: int }
+		type Expression = Node & { t: Type }
+					    = { t: Type } & Node
+		type Statement = Node
+	*/
+	record, recordErr := p.parseRecordIntersection()
+
+	if recordErr != nil {
+		return nil, recordErr
 	}
 
 	return &ast.StructDeclaration{
 		Name:         identifier.Literal,
-		Variables:    variables,
+		Record:       record,
 		NodeMetadata: ast.CreateMetadata(identifier.Line),
 	}, nil
 }
@@ -228,7 +279,7 @@ func (p *Parser) parseStatement() (ast.Statement, error) {
 		return p.parseIfStatement()
 	} else if p.MatchToken(lexer.WHILE) {
 		return p.parseWhileStatement()
-	} else if p.MatchToken(lexer.STRUCT) {
+	} else if p.MatchToken(lexer.TYPE) {
 		return p.parseStructDeclaration()
 	} else if p.MatchToken(lexer.RETURN) {
 		return p.parseReturnStatement()

@@ -31,24 +31,16 @@ func (v *VariableDeclaration) String() string {
 type StructDeclaration struct {
 	Statement
 	NodeMetadata
-	Name      string
-	Variables []VariableDeclaration
+	Name   string
+	Record RecordType
 }
 
 func (s *StructDeclaration) String() string {
 	var builder strings.Builder
 
-	builder.WriteString("(StructDeclaration [")
-
-	for i, variable := range s.Variables {
-		builder.WriteString(variable.String())
-
-		if i != len(s.Variables)-1 {
-			builder.WriteString(", ")
-		}
-	}
-
-	builder.WriteString("])")
+	builder.WriteString("(StructDeclaration ")
+	builder.WriteString(s.Record.String())
+	builder.WriteString(")")
 
 	return builder.String()
 }

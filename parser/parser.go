@@ -85,7 +85,7 @@ func (p *Parser) Consume(tokenType lexer.TokenType, message string) (*lexer.Toke
 func (p *Parser) Calibrate() {
 	p.AdvanceToken()
 
-	for p.PeekToken() != nil && !p.Check(lexer.WHILE, lexer.IF, lexer.WHILE, lexer.LET, lexer.STRUCT, lexer.L_BRACE) {
+	for p.PeekToken() != nil && !p.Check(lexer.WHILE, lexer.IF, lexer.WHILE, lexer.LET, lexer.TYPE, lexer.L_BRACE) {
 		p.AdvanceToken()
 	}
 }

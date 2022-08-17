@@ -40,7 +40,7 @@ const (
 	ELSE
 	RETURN
 	FUNCTION
-	STRUCT
+	TYPE
 	MODULE
 	AND
 	OR
@@ -121,8 +121,8 @@ func TokenTypeToString(token TokenType) string {
 		return "ELSE"
 	case RETURN:
 		return "RETURN"
-	case STRUCT:
-		return "STRUCT"
+	case TYPE:
+		return "TYPE"
 	case MODULE:
 		return "MODULE"
 	case AND:

@@ -31,11 +31,11 @@ var keywords = map[string]TokenType{
 	"else":   ELSE,
 	"true":   TRUE,
 	"false":  FALSE,
-	"fun":    FUNCTION,
+	"fn":     FUNCTION,
 	"and":    AND,
 	"or":     OR,
-	"struct": STRUCT,
-	"module": MODULE,
+	"type":   TYPE,
+	"mod":    MODULE,
 	"return": RETURN,
 }
 

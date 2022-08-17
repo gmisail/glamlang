@@ -30,6 +30,39 @@ type FunctionType struct {
 	ReturnType Type
 }
 
+func (f *FunctionType) String() string {
+	var builder strings.Builder
+
+	for i, param := range f.Parameters {
+		builder.WriteString(param.String())
+
+		if i != len(f.Parameters)-1 {
+			builder.WriteString(", ")
+		}
+	}
+
+	return fmt.Sprintf("(%s) -> %s", builder.String(), f.ReturnType.String())
+}
+
+type RecordType struct {
+	Type
+	Variables map[string]Type
+}
+
+func (r *RecordType) String() string {
+	var builder strings.Builder
+
+	builder.WriteString("{\n")
+
+	for _, v := range r.Variables {
+		builder.WriteString(fmt.Sprintf("%s: %s\n", v.Name, v.Type))
+	}
+
+	builder.WriteString("}")
+
+	return builder.String()
+}
+
 var internalTypes = map[string]Type{
 	"int":    &VariableType{Base: "int", Optional: false},
 	"float":  &VariableType{Base: "float", Optional: false},
@@ -58,6 +91,8 @@ func (v *VariableType) Equals(otherType Type) bool {
 			return false
 		}
 	case *FunctionType:
+		return false
+	case *RecordType:
 		return false
 	}
 
@@ -92,23 +127,40 @@ func (f *FunctionType) Equals(otherType Type) bool {
 		if !target.ReturnType.Equals(f.ReturnType) {
 			return false
 		}
+	case *RecordType:
+		return false
 	}
 
 	return true
 }
 
-func (f *FunctionType) String() string {
-	var builder strings.Builder
-
-	for i, param := range f.Parameters {
-		builder.WriteString(param.String())
-
-		if i != len(f.Parameters)-1 {
-			builder.WriteString(", ")
-		}
+func (r *RecordType) Equals(otherType Type) bool {
+	if otherType == nil {
+		return false
 	}
 
-	return fmt.Sprintf("(%s) -> %s", builder.String(), f.ReturnType.String())
+	switch target := otherType.(type) {
+	case *VariableType:
+		return false
+	case *FunctionType:
+		return false
+	case *RecordType:
+		/*
+			Ensure that every property in the calling Record is
+			available in the target Record.
+		*/
+		for variableName, variableType := range r.Variables {
+			if match, ok := target.Variables[variableName]; ok {
+				if !variableType.Equals(match) {
+					return false
+				}
+			}
+		}
+
+		return true
+	}
+
+	return true
 }
 
 func CreateVariableType(name string, isOptional bool) *VariableType {

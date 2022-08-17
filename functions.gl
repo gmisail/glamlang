@@ -1,21 +1,21 @@
-let sum : (int, int) -> int = fun(bugs:int, bunny:int): int => {
+let sum : (int, int) -> int = fn(bugs:int, bunny:int): int => {
 	return bugs + bunny
 }
 
-struct Account {
+type Account {
 	balance: float
 	name: string
 	is_overdrawn: bool
 	linked_account: Account
 }
 
-let create_bank : () -> Bank = fun(): Bank => {
+let create_bank : () -> Bank = fn(): Bank => {
 	return 0
 }
 
 let bank : Bank = create_bank()
 
-let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
+let mul : (int, int) -> int = fn(bugs:int, bunny:int): int => {
 	if bugs == 0 {
         while true {
             if 0 == 0 {
@@ -44,7 +44,7 @@ let mul : (int, int) -> int = fun(bugs:int, bunny:int): int => {
 }
 
 let play_song : (string, Album) -> bool =
-fun (song: string, album: Album): bool => {
+fn (song: string, album: Album): bool => {
 	if album.song != song {
 		return false
 	}
