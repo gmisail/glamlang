@@ -9,6 +9,22 @@ type Account {
 	linked_account: Account
 }
 
+type Node {
+	line: int
+}
+
+type Type {
+	base: string
+}
+
+type Expression(Node) {
+	expressionType: Type
+}
+
+type Statement(Node) {
+
+}
+
 let create_bank : () -> Bank = fn(): Bank => {
 	return 0
 }

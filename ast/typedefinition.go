@@ -55,7 +55,7 @@ func (r *RecordType) String() string {
 	builder.WriteString("{\n")
 
 	for _, v := range r.Variables {
-		builder.WriteString(fmt.Sprintf("%s: %s\n", v.Name, v.Type))
+		builder.WriteString(fmt.Sprintf("%s\n", v.String()))
 	}
 
 	builder.WriteString("}")

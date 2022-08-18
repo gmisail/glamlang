@@ -158,25 +158,25 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 		return CreateTypeError(message, stat.Line)
 	}
 
-	for _, structVariable := range stat.Variables {
-		variableName := structVariable.Name
-		variableType := structVariable.Type
-
+	for variableName, variableType := range stat.Record.Variables {
 		switch innerType := variableType.(type) {
 		case *ast.VariableType:
 			if !tc.context.environment.CustomTypeExists(innerType.Base) {
-				isPrimitive, _ := ast.IsInternalType(structVariable.Type)
+				isPrimitive, _ := ast.IsInternalType(variableType)
 
 				if !isPrimitive {
 					message := fmt.Sprintf(
 						"Type '%s' does not exist in this context.",
 						variableType.String(),
 					)
-
-					return CreateTypeError(message, structVariable.Line)
+					
+					// TODO: update to use line number from the type field
+					return CreateTypeError(message, 0)
 				}
 			}
 		case *ast.FunctionType:
+			continue
+		case *ast.RecordType:
 			continue
 		}
 

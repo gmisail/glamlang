@@ -85,69 +85,50 @@ func (p *Parser) parseRecord() (ast.Type, error) {
 	return &ast.RecordType{Variables: variables}, nil
 }
 
-func (p *Parser) parseRecordIntersection() (ast.Type, error) {
-	/*
-		{ x: int } & { y: int }
-		Node & { t: Type }
-		(Node) & {t : Type}
-		Node & ({t : Type} & Statement)
-	*/
-
-	var leftRecord ast.Type = nil
-
-	if p.MatchToken(lexer.L_PAREN) {
-		leftRecord, _ = p.parseRecordIntersection()
-		// TODO: handle err
-
-		p.Consume(lexer.R_PAREN, "Expected right parenthesis.")
-	} else if p.MatchToken(lexer.IDENTIFIER) {
-		leftRecord = &ast.VariableType{Base: p.PreviousToken().Literal, SubType: nil, Optional: false}
-	} else {
-		leftRecord, _ = p.parseRecord()
-	}
-
-	if leftRecord == nil {
-		// TODO: handle err
-	}
-
-	// handle binary parsing, i.e. LEFT (& <record intersection>)?
-
-	return nil, nil
-}
-
 func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 	identifier, identifierErr := p.Consume(
 		lexer.IDENTIFIER,
-		"Expected name after struct definition.",
+		"Expected name after type definition.",
 	)
 
 	if identifierErr != nil {
 		return nil, identifierErr
 	}
 
-	_, equalsErr := p.Consume(lexer.EQUAL, "Expected '=' after type name.")
+	var inheritsFrom string
 
-	if equalsErr != nil {
-		return nil, equalsErr
+	if p.MatchToken(lexer.L_PAREN) {
+		inherits, inheritsErr := p.Consume(lexer.IDENTIFIER, "Expected base type to inherit from.")
+
+		if inheritsErr != nil {
+			return nil, inheritsErr
+		}
+
+		_, parenErr := p.Consume(lexer.R_PAREN, "Expected closing parenthesis.")
+
+		if parenErr != nil {
+			return nil, parenErr
+		}
+
+		inheritsFrom = inherits.Literal
 	}
 
-	/*
-		type <identifier> = <type intersections>
-
-		type Node = { line: int }
-		type Expression = Node & { t: Type }
-					    = { t: Type } & Node
-		type Statement = Node
-	*/
-	record, recordErr := p.parseRecordIntersection()
+	record, recordErr := p.parseRecord()
 
 	if recordErr != nil {
 		return nil, recordErr
 	}
 
+	recordValue, isRecord := record.(*ast.RecordType)
+
+	if !isRecord {
+		return nil, CreateParseError(identifier.Line, "Expected record declaration.")
+	}
+
 	return &ast.StructDeclaration{
 		Name:         identifier.Literal,
-		Record:       record,
+		Record:       *recordValue,
+		Inherits:     inheritsFrom,
 		NodeMetadata: ast.CreateMetadata(identifier.Line),
 	}, nil
 }

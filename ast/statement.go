@@ -31,8 +31,9 @@ func (v *VariableDeclaration) String() string {
 type StructDeclaration struct {
 	Statement
 	NodeMetadata
-	Name   string
-	Record RecordType
+	Name     string
+	Record   RecordType
+	Inherits string
 }
 
 func (s *StructDeclaration) String() string {
