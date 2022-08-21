@@ -25,6 +25,8 @@ type Statement(Node) {
 
 }
 
+let x : int = { name: "graham", age: 21 }
+
 let create_bank : () -> Bank = fn(): Bank => {
 	return 0
 }

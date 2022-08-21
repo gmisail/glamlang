@@ -34,6 +34,14 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		}
 
 		return &ast.Group{NodeMetadata: ast.CreateMetadata(token.Line), Value: expr}, nil
+	} else if p.MatchToken(lexer.L_BRACE) {
+		expr, err := p.parseRecordInstantiation()
+
+		if err != nil {
+			return nil, err
+		}
+
+		return expr, nil
 	}
 
 	return nil, &ParseError{
@@ -43,6 +51,43 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		),
 		line: p.CurrentToken().Line,
 	}
+}
+
+func (p *Parser) parseRecordInstantiation() (ast.Expression, error) {
+	// get the line number of the opening '{'
+	line := p.PreviousToken().Line
+	values := make(map[string]ast.Expression)
+
+	for {
+		fmt.Println("start parsing")
+		if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
+			break
+		}
+
+		variableName, variableErr := p.Consume(lexer.IDENTIFIER, "Expected variable name")
+
+		if variableErr != nil {
+			return nil, variableErr
+		}
+
+		_, colonErr := p.Consume(lexer.COLON, "Expected ':' after variable name.")
+
+		if colonErr != nil {
+			return nil, colonErr
+		}
+
+		variableValue, valueErr := p.parseExpression()
+
+		if valueErr != nil {
+			return nil, valueErr
+		}
+
+		values[variableName.Literal] = variableValue
+
+		fmt.Println("end parsing")
+	}
+
+	return &ast.RecordInstance{NodeMetadata: ast.CreateMetadata(line), Values: values}, nil
 }
 
 func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expression, error) {

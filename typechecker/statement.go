@@ -169,7 +169,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 						"Type '%s' does not exist in this context.",
 						variableType.String(),
 					)
-					
+
 					// TODO: update to use line number from the type field
 					return CreateTypeError(message, 0)
 				}

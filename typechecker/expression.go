@@ -90,9 +90,27 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 		return tc.checkLogical(exprType)
 	case *ast.GetExpression:
 		return tc.checkGetExpression(exprType)
+	case *ast.RecordInstance:
+		return tc.checkRecordInstance(exprType)
 	}
 
 	return nil, nil
+}
+
+func (tc *TypeChecker) checkRecordInstance(record *ast.RecordInstance) (ast.Type, error) {
+	fields := make(map[string]ast.Type)
+
+	for field, fieldValue := range record.Values {
+		fieldType, typeErr := tc.CheckExpression(fieldValue)
+
+		if typeErr != nil {
+			return nil, typeErr
+		}
+
+		fields[field] = fieldType
+	}
+
+	return &ast.RecordType{Variables: fields}, nil
 }
 
 func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, error) {

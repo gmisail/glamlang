@@ -52,10 +52,10 @@ type RecordType struct {
 func (r *RecordType) String() string {
 	var builder strings.Builder
 
-	builder.WriteString("{\n")
+	builder.WriteString("{ ")
 
 	for _, v := range r.Variables {
-		builder.WriteString(fmt.Sprintf("%s\n", v.String()))
+		builder.WriteString(fmt.Sprintf("%s, ", v.String()))
 	}
 
 	builder.WriteString("}")

@@ -127,6 +127,12 @@ func (v *VariableExpression) GetType() Type {
 	return v.NodeMetadata.Type
 }
 
+type RecordInstance struct {
+	Expression
+	NodeMetadata
+	Values map[string]Expression
+}
+
 type FunctionCall struct {
 	Expression
 	NodeMetadata
