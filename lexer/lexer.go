@@ -37,6 +37,7 @@ var keywords = map[string]TokenType{
 	"type":   TYPE,
 	"mod":    MODULE,
 	"return": RETURN,
+	"new":    NEW,
 }
 
 func (l *LexerError) Error() string {

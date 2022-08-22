@@ -22,7 +22,8 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 	} else if p.MatchToken(lexer.STRING, lexer.INT, lexer.FLOAT) {
 		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: token.Literal, LiteralType: token.Type}, nil
 	} else if p.MatchToken(lexer.IDENTIFIER) {
-		return &ast.VariableExpression{NodeMetadata: ast.CreateMetadata(token.Line), Value: p.PreviousToken().Literal}, nil
+		value := p.PreviousToken().Literal
+		return &ast.VariableExpression{NodeMetadata: ast.CreateMetadata(token.Line), Value: value}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
 		expr, _ := p.parseExpression()
 		//benabenabenabenabenabenabenabenabenabenabenabenabenabena
@@ -34,14 +35,6 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		}
 
 		return &ast.Group{NodeMetadata: ast.CreateMetadata(token.Line), Value: expr}, nil
-	} else if p.MatchToken(lexer.L_BRACE) {
-		expr, err := p.parseRecordInstantiation()
-
-		if err != nil {
-			return nil, err
-		}
-
-		return expr, nil
 	}
 
 	return nil, &ParseError{
@@ -53,13 +46,13 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 	}
 }
 
-func (p *Parser) parseRecordInstantiation() (ast.Expression, error) {
+func (p *Parser) parseRecordInstantiation(baseType string) (ast.Expression, error) {
 	// get the line number of the opening '{'
 	line := p.PreviousToken().Line
 	values := make(map[string]ast.Expression)
 
 	for {
-		fmt.Println("start parsing")
+		//fmt.Println(lexer.TokenTypeToString(p.CurrentToken().Type))
 		if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
 			break
 		}
@@ -83,11 +76,32 @@ func (p *Parser) parseRecordInstantiation() (ast.Expression, error) {
 		}
 
 		values[variableName.Literal] = variableValue
-
-		fmt.Println("end parsing")
 	}
 
 	return &ast.RecordInstance{NodeMetadata: ast.CreateMetadata(line), Values: values}, nil
+}
+
+// TODO: parse this
+func (p *Parser) parseNewExpression() (ast.Expression, error) {
+	if p.MatchToken(lexer.NEW) {
+		ident, identErr := p.Consume(lexer.IDENTIFIER, "Expected type name.")
+
+		if identErr != nil {
+			return nil, identErr
+		}
+
+		if p.MatchToken(lexer.L_BRACE) {
+			expr, err := p.parseRecordInstantiation(ident.Literal)
+
+			if err != nil {
+				return nil, err
+			}
+
+			return expr, nil
+		}
+	}
+
+	return p.parsePrimary()
 }
 
 func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expression, error) {
@@ -241,7 +255,7 @@ func (p *Parser) parseFunction() (ast.Expression, error) {
 func (p *Parser) parseUnary() (ast.Expression, error) {
 	if p.MatchToken(lexer.BANG, lexer.SUB) {
 		op := p.PreviousToken()
-		expr, err := p.parsePrimary()
+		expr, err := p.parseCall()
 
 		if err != nil {
 			return nil, err

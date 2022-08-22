@@ -25,7 +25,10 @@ type Statement(Node) {
 
 }
 
-let x : int = { name: "graham", age: 21 }
+type User {
+	name: string,
+	age: int
+}
 
 let create_bank : () -> Bank = fn(): Bank => {
 	return 0
@@ -61,8 +64,7 @@ let mul : (int, int) -> int = fn(bugs:int, bunny:int): int => {
 	return bugs * bunny 
 }
 
-let play_song : (string, Album) -> bool =
-fn (song: string, album: Album): bool => {
+let play_song : (string, Album) -> bool = fn (song: string, album: Album): bool => {
 	if album.song != song {
 		return false
 	}

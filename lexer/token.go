@@ -44,6 +44,7 @@ const (
 	MODULE
 	AND
 	OR
+	NEW
 	ARROW
 	THICK_ARROW
 	TRUE
@@ -129,6 +130,8 @@ func TokenTypeToString(token TokenType) string {
 		return "AND"
 	case OR:
 		return "OR"
+	case NEW:
+		return "NEW"
 	case ARROW:
 		return "ARROW"
 	case THICK_ARROW:
