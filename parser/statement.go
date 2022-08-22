@@ -174,10 +174,23 @@ func (p *Parser) parseBlockStatement() (ast.Statement, error) {
 
 func (p *Parser) parseIfStatement() (ast.Statement, error) {
 	line := p.PreviousToken().Line
+
+	_, openParenErr := p.Consume(lexer.L_PAREN, "Expected open parenthesis.")
+
+	if openParenErr != nil {
+		return nil, openParenErr
+	}
+
 	condition, conditionErr := p.parseExpression()
 
 	if conditionErr != nil {
 		return nil, conditionErr
+	}
+
+	_, closeParenErr := p.Consume(lexer.R_PAREN, "Expected closing parenthesis.")
+
+	if closeParenErr != nil {
+		return nil, closeParenErr
 	}
 
 	ifBranch, ifBranchErr := p.parseStatement()
@@ -208,10 +221,23 @@ func (p *Parser) parseIfStatement() (ast.Statement, error) {
 
 func (p *Parser) parseWhileStatement() (ast.Statement, error) {
 	line := p.PreviousToken().Line
+
+	_, openParenErr := p.Consume(lexer.L_PAREN, "Expected open parenthesis.")
+
+	if openParenErr != nil {
+		return nil, openParenErr
+	}
+
 	condition, conditionErr := p.parseExpression()
 
 	if conditionErr != nil {
 		return nil, conditionErr
+	}
+
+	_, closeParenErr := p.Consume(lexer.R_PAREN, "Expected closing parenthesis.")
+
+	if closeParenErr != nil {
+		return nil, closeParenErr
 	}
 
 	body, bodyErr := p.parseStatement()

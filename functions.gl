@@ -37,11 +37,11 @@ let create_bank : () -> Bank = fn(): Bank => {
 let bank : Bank = create_bank()
 
 let mul : (int, int) -> int = fn(bugs:int, bunny:int): int => {
-	if bugs == 0 {
-        while true {
-            if 0 == 0 {
+	if (bugs == 0) {
+        while (true) {
+            if (0 == 0) {
                 return 10
-            } else if 10 == 10 {
+            } else if (10 == 10) {
                 let z : int = 5
                 let y : int = 1
 
@@ -54,18 +54,18 @@ let mul : (int, int) -> int = fn(bugs:int, bunny:int): int => {
         }
     }
 
-    if bugs == 0 {
+    if (bugs == 0) {
         return 100 
     }
 
-    if bugs == 0
+    if (bugs == 0)
         return 0
 
 	return bugs * bunny 
 }
 
 let play_song : (string, Album) -> bool = fn (song: string, album: Album): bool => {
-	if album.song != song {
+	if (album.song != song) {
 		return false
 	}
 	
