@@ -97,6 +97,42 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 	return nil, nil
 }
 
+func createRecordFromEnvironment(env *Environment) *ast.RecordType {
+	fields := make(map[string]ast.Type)
+
+	for field, fieldType := range env.Values {
+		fields[field] = *fieldType
+	}
+
+	return &ast.RecordType{Variables: fields}
+}
+
+/*
+Expand types of record types.
+*/
+func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
+	firstType := first
+	secondType := second
+
+	if v, ok := first.(*ast.VariableType); ok {
+		isRecord, recordFields := tc.context.environment.GetType(v.Base)
+
+		if isRecord {
+			firstType = createRecordFromEnvironment(recordFields)
+		}
+	}
+
+	if v, ok := second.(*ast.VariableType); ok {
+		isRecord, recordFields := tc.context.environment.GetType(v.Base)
+
+		if isRecord {
+			secondType = createRecordFromEnvironment(recordFields)
+		}
+	}
+
+	return firstType.Equals(secondType)
+}
+
 func (tc *TypeChecker) checkRecordInstance(record *ast.RecordInstance) (ast.Type, error) {
 	fields := make(map[string]ast.Type)
 

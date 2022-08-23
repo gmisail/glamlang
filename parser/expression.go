@@ -23,6 +23,11 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		return &ast.Literal{NodeMetadata: ast.CreateMetadata(token.Line), Value: token.Literal, LiteralType: token.Type}, nil
 	} else if p.MatchToken(lexer.IDENTIFIER) {
 		value := p.PreviousToken().Literal
+
+		if p.MatchToken(lexer.L_BRACE) {
+			return p.parseRecordInstantiation(value)
+		}
+
 		return &ast.VariableExpression{NodeMetadata: ast.CreateMetadata(token.Line), Value: value}, nil
 	} else if p.MatchToken(lexer.L_PAREN) {
 		expr, _ := p.parseExpression()
@@ -79,29 +84,6 @@ func (p *Parser) parseRecordInstantiation(baseType string) (ast.Expression, erro
 	}
 
 	return &ast.RecordInstance{NodeMetadata: ast.CreateMetadata(line), Values: values}, nil
-}
-
-// TODO: parse this
-func (p *Parser) parseNewExpression() (ast.Expression, error) {
-	if p.MatchToken(lexer.NEW) {
-		ident, identErr := p.Consume(lexer.IDENTIFIER, "Expected type name.")
-
-		if identErr != nil {
-			return nil, identErr
-		}
-
-		if p.MatchToken(lexer.L_BRACE) {
-			expr, err := p.parseRecordInstantiation(ident.Literal)
-
-			if err != nil {
-				return nil, err
-			}
-
-			return expr, nil
-		}
-	}
-
-	return p.parsePrimary()
 }
 
 func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expression, error) {

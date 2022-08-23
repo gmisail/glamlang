@@ -30,6 +30,8 @@ type User {
 	age: int
 }
 
+let user : User = User { name: "graham", age: 21 }
+
 let create_bank : () -> Bank = fn(): Bank => {
 	return 0
 }
