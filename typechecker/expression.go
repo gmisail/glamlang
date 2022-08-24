@@ -97,19 +97,10 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 	return nil, nil
 }
 
-func createRecordFromEnvironment(env *Environment) *ast.RecordType {
-	fields := make(map[string]ast.Type)
-
-	for field, fieldType := range env.Values {
-		fields[field] = *fieldType
-	}
-
-	return &ast.RecordType{Variables: fields}
-}
-
-/*
-Expand types of record types.
-*/
+/**
+ * Checks if two types match. Prior to comparing the types, it will
+ * resolve the type in case it is a user-defined record.
+ */
 func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
 	firstType := first
 	secondType := second
@@ -118,7 +109,7 @@ func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
 		isRecord, recordFields := tc.context.environment.GetType(v.Base)
 
 		if isRecord {
-			firstType = createRecordFromEnvironment(recordFields)
+			firstType = recordFields
 		}
 	}
 
@@ -126,7 +117,7 @@ func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
 		isRecord, recordFields := tc.context.environment.GetType(v.Base)
 
 		if isRecord {
-			secondType = createRecordFromEnvironment(recordFields)
+			secondType = recordFields
 		}
 	}
 
@@ -168,7 +159,7 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, er
 			)
 		}
 
-		memberExists, memberType := typeMembers.Find(expr.Name)
+		memberType, memberExists := typeMembers.Variables[expr.Name]
 
 		if !memberExists {
 			message := fmt.Sprintf(
@@ -180,9 +171,9 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, er
 			return nil, CreateTypeError(message, expr.Line)
 		}
 
-		expr.Type = *memberType
+		expr.Type = memberType
 
-		return *memberType, nil
+		return memberType, nil
 	case *ast.FunctionType:
 		return nil, CreateTypeError(
 			"Cannot access a member variable of a function type.",
@@ -228,7 +219,7 @@ func (tc *TypeChecker) checkFunctionCall(expr *ast.FunctionCall) (ast.Type, erro
 				return nil, argErr
 			}
 
-			if !param.Equals(argType) {
+			if !tc.match(param, argType) {
 				message := fmt.Sprintf(
 					"Expected type of %d%s argument to be %s, got %s.",
 					i+1,
@@ -262,7 +253,7 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 		return nil, rightErr
 	}
 
-	isEqual := leftType.Equals(rightType)
+	isEqual := tc.match(leftType, rightType)
 
 	if !isEqual {
 		message := fmt.Sprintf(
@@ -308,7 +299,7 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 			return nil, valueErr
 		}
 
-		if !valueType.Equals(ast.CreateTypeFromLiteral(lexer.BOOL)) {
+		if !tc.match(valueType, ast.CreateTypeFromLiteral(lexer.BOOL)) {
 			message := fmt.Sprintf(
 				"Expected type in 'not' expression to be bool, instead got incompatible type %s.",
 				valueType.String(),
@@ -328,8 +319,8 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 			return nil, valueErr
 		}
 
-		if !valueType.Equals(ast.CreateTypeFromLiteral(lexer.INT)) &&
-			!valueType.Equals(ast.CreateTypeFromLiteral(lexer.FLOAT)) {
+		if !tc.match(valueType, ast.CreateTypeFromLiteral(lexer.INT)) &&
+			!tc.match(valueType, ast.CreateTypeFromLiteral(lexer.FLOAT)) {
 			message := fmt.Sprintf(
 				"Expected type in negation to be int or float, instead got incompatible type %s.",
 				valueType.String(),
@@ -361,7 +352,7 @@ func (tc *TypeChecker) checkLogical(expr *ast.Logical) (ast.Type, error) {
 
 	boolType := ast.CreateTypeFromLiteral(lexer.BOOL)
 
-	if !leftType.Equals(boolType) {
+	if !tc.match(leftType, boolType) {
 		return nil, CreateTypeError(
 			fmt.Sprintf(
 				"Expected the left side of logical statement to be of type bool, got %s.",
@@ -371,7 +362,7 @@ func (tc *TypeChecker) checkLogical(expr *ast.Logical) (ast.Type, error) {
 		)
 	}
 
-	if !rightType.Equals(boolType) {
+	if !tc.match(rightType, boolType) {
 		return nil, CreateTypeError(
 			fmt.Sprintf(
 				"Expected the right side of logical statement to be of type bool, got %s.",

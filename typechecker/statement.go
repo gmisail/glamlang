@@ -76,7 +76,7 @@ func (tc *TypeChecker) checkVariableDeclaration(v *ast.VariableDeclaration) erro
 		return valueErr
 	}
 
-	isEqual := variableType.Equals(valueType)
+	isEqual := tc.match(variableType, valueType)
 
 	if !isEqual {
 		message := fmt.Sprintf(
@@ -102,7 +102,7 @@ func (tc *TypeChecker) checkIfStatement(stat *ast.IfStatement) error {
 		return conditionErr
 	}
 
-	if !conditionType.Equals(ast.CreateTypeFromLiteral(lexer.BOOL)) {
+	if !tc.match(conditionType, ast.CreateTypeFromLiteral(lexer.BOOL)) {
 		message := fmt.Sprintf(
 			"Expected condition in 'if' statement to be boolean, got %s.",
 			conditionType.String(),
@@ -134,7 +134,7 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 		return conditionErr
 	}
 
-	if !conditionType.Equals(ast.CreateTypeFromLiteral(lexer.BOOL)) {
+	if !tc.match(conditionType, ast.CreateTypeFromLiteral(lexer.BOOL)) {
 		message := fmt.Sprintf(
 			"Expected condition in 'while' statement to be boolean, got %s.",
 			conditionType.String(),
@@ -151,14 +151,16 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 }
 
 func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
-	isUnique, structEnv := tc.context.environment.AddType(stat.Name)
+	isDefined, _ := tc.context.environment.GetType(stat.Name)
+	fields := make(map[string]ast.Type)
 
-	if !isUnique {
+	if isDefined {
 		message := fmt.Sprintf("Struct '%s' already defined.", stat.String())
 		return CreateTypeError(message, stat.Line)
 	}
 
 	for variableName, variableType := range stat.Record.Variables {
+		//fmt.Println("checking", variableName, variableType)
 		switch innerType := variableType.(type) {
 		case *ast.VariableType:
 			if !tc.context.environment.CustomTypeExists(innerType.Base) {
@@ -180,8 +182,10 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 			continue
 		}
 
-		structEnv.Add(variableName, &variableType)
+		fields[variableName] = variableType
 	}
+
+	tc.context.environment.AddType(stat.Name, ast.RecordType{Variables: fields})
 
 	return nil
 }
@@ -255,7 +259,7 @@ func (tc *TypeChecker) checkLastReturnStatement(
 		if statement, ok := lastStatement.(*ast.ReturnStatement); ok {
 			returnType := statement.Value.GetType().(ast.Type)
 
-			if !expectedType.Equals(returnType) {
+			if !tc.match(expectedType, returnType) {
 				return false, CreateTypeError(
 					fmt.Sprintf(
 						"Expected function to return value of type %s, but instead returned %s.",
@@ -280,7 +284,7 @@ func (tc *TypeChecker) checkLastReturnStatement(
 			return false, err
 		}
 
-		if !expressionType.Equals(expressionType) {
+		if !tc.match(expressionType, expressionType) {
 			return false, CreateTypeError(
 				fmt.Sprintf(
 					"Expected function to return value of type %s, but instead returned %s.",
@@ -319,7 +323,7 @@ func (tc *TypeChecker) checkStatementForReturns(
 			)
 		}
 
-		if !expectedType.Equals(returnType) {
+		if !tc.match(expectedType, returnType) {
 			return CreateTypeError(
 				fmt.Sprintf("Expected incorrect return type."),
 				statementType.Value.GetLine(),

@@ -7,14 +7,14 @@ import (
 type Environment struct {
 	Parent *Environment
 	Values map[string]*ast.Type
-	Types  map[string]*Environment
+	Types  map[string]ast.RecordType
 }
 
 func CreateEnvironment(parent *Environment) *Environment {
 	return &Environment{
 		Parent: parent,
 		Values: make(map[string]*ast.Type),
-		Types:  make(map[string]*Environment),
+		Types:  make(map[string]ast.RecordType),
 	}
 }
 
@@ -66,20 +66,19 @@ Adds a custom type (i.e. struct) if it does not exist already. Returns
 true if it was added as well as an environment which represents the
 variables within the struct.
 */
-func (e *Environment) AddType(typeName string) (bool, *Environment) {
+func (e *Environment) AddType(typeName string, record ast.RecordType) bool {
 	if e.CustomTypeExists(typeName) {
-		return false, nil
+		return false
 	}
 
-	environment := CreateEnvironment(nil)
-	e.Types[typeName] = environment
+	e.Types[typeName] = record
 
-	return true, environment
+	return true
 }
 
-func (e *Environment) GetType(typeName string) (bool, *Environment) {
+func (e *Environment) GetType(typeName string) (bool, *ast.RecordType) {
 	if customType, ok := e.Types[typeName]; ok {
-		return true, customType
+		return true, &customType
 	}
 
 	if e.Parent == nil {

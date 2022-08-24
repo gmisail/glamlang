@@ -151,9 +151,12 @@ func (r *RecordType) Equals(otherType Type) bool {
 		*/
 		for variableName, variableType := range r.Variables {
 			if match, ok := target.Variables[variableName]; ok {
+				// TODO: resolve type if it's a record
 				if !variableType.Equals(match) {
 					return false
 				}
+			} else {
+				return false
 			}
 		}
 
