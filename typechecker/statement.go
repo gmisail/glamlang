@@ -160,7 +160,6 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 	}
 
 	for variableName, variableType := range stat.Record.Variables {
-		//fmt.Println("checking", variableName, variableType)
 		switch innerType := variableType.(type) {
 		case *ast.VariableType:
 			if !tc.context.TypeExists(innerType.Base) {

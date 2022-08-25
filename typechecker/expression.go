@@ -97,6 +97,33 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 	return nil, nil
 }
 
+/*
+ * Recursively expand every Record name into its expanded form.
+ *
+ * For instance, "User" --> { name: string, bio: string }
+*/
+func (tc *TypeChecker) resolve(record ast.RecordType) ast.Type {
+	resolvedFields := make(map[string]ast.Type)
+
+	// TODO: rename Variables to Fields, makes more sense
+	for field, fieldType := range record.Variables {
+		if subRecord, ok := fieldType.(*ast.VariableType); ok {
+			isRecord, recordFields := tc.context.FindType(subRecord.Base)
+
+			if isRecord {
+				resolvedFields[field] = tc.resolve(*recordFields)
+
+				continue
+			} 
+		}
+
+		// if the field isn't a record, keep the original type.
+		resolvedFields[field] = fieldType
+	}
+
+	return &ast.RecordType{ Variables: resolvedFields }
+}
+
 /**
  * Checks if two types match. Prior to comparing the types, it will
  * resolve the type in case it is a user-defined record.
