@@ -4,14 +4,15 @@ import (
 	//	"fmt"
 	"github.com/fatih/color"
 	"github.com/gmisail/glamlang/ast"
+	"github.com/gmisail/glamlang/context"
 )
 
 type TypeChecker struct {
-	context *Context
+	context *context.Context
 }
 
 func CreateTypeChecker() *TypeChecker {
-	return &TypeChecker{context: CreateContext()}
+	return &TypeChecker{context: context.CreateContext()}
 }
 
 func (tc *TypeChecker) CheckAll(statements []ast.Statement) bool {

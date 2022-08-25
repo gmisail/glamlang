@@ -22,7 +22,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 		// literals always check successfully
 		return literalType, nil
 	case *ast.VariableExpression:
-		targetExists, targetType := tc.context.Find(exprType.Value)
+		targetExists, targetType := tc.context.FindVariable(exprType.Value)
 
 		if !targetExists {
 			return nil, CreateTypeError(
@@ -106,7 +106,7 @@ func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
 	secondType := second
 
 	if v, ok := first.(*ast.VariableType); ok {
-		isRecord, recordFields := tc.context.environment.GetType(v.Base)
+		isRecord, recordFields := tc.context.FindType(v.Base)
 
 		if isRecord {
 			firstType = recordFields
@@ -114,7 +114,7 @@ func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
 	}
 
 	if v, ok := second.(*ast.VariableType); ok {
-		isRecord, recordFields := tc.context.environment.GetType(v.Base)
+		isRecord, recordFields := tc.context.FindType(v.Base)
 
 		if isRecord {
 			secondType = recordFields
@@ -150,7 +150,7 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, er
 	switch variableType := parentType.(type) {
 	case *ast.VariableType:
 		typeName := variableType.Base
-		typeExists, typeMembers := tc.context.environment.GetType(typeName)
+		typeExists, typeMembers := tc.context.FindType(typeName)
 
 		if !typeExists {
 			return nil, CreateTypeError(

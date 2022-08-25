@@ -151,7 +151,7 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 }
 
 func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
-	isDefined, _ := tc.context.environment.GetType(stat.Name)
+	isDefined, _ := tc.context.FindType(stat.Name)
 	fields := make(map[string]ast.Type)
 
 	if isDefined {
@@ -163,7 +163,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 		//fmt.Println("checking", variableName, variableType)
 		switch innerType := variableType.(type) {
 		case *ast.VariableType:
-			if !tc.context.environment.CustomTypeExists(innerType.Base) {
+			if !tc.context.TypeExists(innerType.Base) {
 				isPrimitive, _ := ast.IsInternalType(variableType)
 
 				if !isPrimitive {
@@ -185,7 +185,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 		fields[variableName] = variableType
 	}
 
-	tc.context.environment.AddType(stat.Name, ast.RecordType{Variables: fields})
+	tc.context.AddType(stat.Name, ast.RecordType{Variables: fields})
 
 	return nil
 }

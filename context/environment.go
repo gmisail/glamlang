@@ -1,4 +1,4 @@
-package typechecker
+package context
 
 import (
 	"github.com/gmisail/glamlang/ast"
@@ -21,7 +21,7 @@ func CreateEnvironment(parent *Environment) *Environment {
 /*
 Looks up the type of a variable if it exists.
 */
-func (e *Environment) Find(name string) (bool, *ast.Type) {
+func (e *Environment) FindVariable(name string) (bool, *ast.Type) {
 	// check the current scope
 	if variableType, ok := e.Values[name]; ok {
 		return true, variableType
@@ -31,15 +31,15 @@ func (e *Environment) Find(name string) (bool, *ast.Type) {
 		return false, nil
 	}
 
-	return e.Parent.Find(name)
+	return e.Parent.FindVariable(name)
 }
 
 /*
 Adds a variable to the context. Returns false
 if the variable already exists in the current scope.
 */
-func (e *Environment) Add(variableName string, variableType *ast.Type) bool {
-	exists, _ := e.Find(variableName)
+func (e *Environment) AddVariable(variableName string, variableType *ast.Type) bool {
+	exists, _ := e.FindVariable(variableName)
 
 	if exists {
 		return false
@@ -53,12 +53,9 @@ func (e *Environment) Add(variableName string, variableType *ast.Type) bool {
 /*
 Returns if a custom type exists in the current context.
 */
-func (e *Environment) CustomTypeExists(typeName string) bool {
-	if _, ok := e.Types[typeName]; ok {
-		return true
-	}
-
-	return false
+func (e *Environment) TypeExists(typeName string) bool {
+	exists, _ := e.FindType(typeName)
+	return exists
 }
 
 /*
@@ -67,7 +64,7 @@ true if it was added as well as an environment which represents the
 variables within the struct.
 */
 func (e *Environment) AddType(typeName string, record ast.RecordType) bool {
-	if e.CustomTypeExists(typeName) {
+	if e.TypeExists(typeName) {
 		return false
 	}
 
@@ -76,7 +73,7 @@ func (e *Environment) AddType(typeName string, record ast.RecordType) bool {
 	return true
 }
 
-func (e *Environment) GetType(typeName string) (bool, *ast.RecordType) {
+func (e *Environment) FindType(typeName string) (bool, *ast.RecordType) {
 	if customType, ok := e.Types[typeName]; ok {
 		return true, &customType
 	}
@@ -85,5 +82,5 @@ func (e *Environment) GetType(typeName string) (bool, *ast.RecordType) {
 		return false, nil
 	}
 
-	return e.Parent.GetType(typeName)
+	return e.Parent.FindType(typeName)
 }

@@ -1,4 +1,4 @@
-package typechecker
+package context
 
 import (
 	"github.com/gmisail/glamlang/ast"
@@ -15,8 +15,8 @@ func CreateContext() *Context {
 /*
 Looks up the type of a variable if it exists.
 */
-func (c *Context) Find(name string) (bool, *ast.Type) {
-	isValid, variableType := c.environment.Find(name)
+func (c *Context) FindVariable(name string) (bool, *ast.Type) {
+	isValid, variableType := c.environment.FindVariable(name)
 
 	if isValid {
 		return isValid, variableType
@@ -29,7 +29,19 @@ func (c *Context) Find(name string) (bool, *ast.Type) {
 Adds variable to the current scope.
 */
 func (c *Context) Add(variableName string, variableType *ast.Type) bool {
-	return c.environment.Add(variableName, variableType)
+	return c.environment.AddVariable(variableName, variableType)
+}
+
+func (c *Context) AddType(typeName string, recordType ast.RecordType) bool {
+	return c.environment.AddType(typeName, recordType)
+}
+
+func (c *Context) FindType(typeName string) (bool, *ast.RecordType) {
+	return c.environment.FindType(typeName)
+}
+
+func (c *Context) TypeExists(typeName string) bool {
+	return c.environment.TypeExists(typeName)
 }
 
 /*
