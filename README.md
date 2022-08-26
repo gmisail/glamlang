@@ -20,7 +20,7 @@ go test -v
 let a : int = 150
 let b : int = 4100
 
-let sum : (int, int) -> int = fun(x: int, y: int): int => x + y
+let sum : (int, int) -> int = fn(x: int, y: int): int => x + y
 
 sum(a, b)   # 4250
 ```
