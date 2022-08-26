@@ -181,7 +181,7 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, er
 
 		if !typeExists {
 			return nil, CreateTypeError(
-				"Cannot access member variable from a non-existent struct type.",
+				fmt.Sprintf("Cannot access member variable from a non-existent type '%s'.", typeName),
 				expr.Line,
 			)
 		}
