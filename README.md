@@ -5,7 +5,12 @@ Glam is a experimental programming language inspired by Javascript, Haskell, and
 ## Build
 Glam requires `task` for running project commands. To build, simply run:
 ```
-task build
+task build -- <file to run>
+```
+
+For example, if I'd like to run `main.gl`:
+```
+task build -- main.gl
 ```
 
 ## Tests
