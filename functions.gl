@@ -24,12 +24,38 @@ type Statement(Node) {
 
 }
 
+type ListValue {
+	value: string
+	num: int
+}
+
+type ListNode {
+	next: ListValue
+	current: ListValue
+	prev: ListValue
+}
+
 type User {
 	name: string,
 	age: int
 }
 
 let user : User = User { name: "graham", age: 21 }
+
+let listNode : ListNode = ListNode {
+	prev: ListValue { 
+		value: "hello world",
+		num: 0
+	},
+	current: ListValue { 
+		value: "hello world",
+		num: 100
+	},
+	next: ListValue { 
+		value: "hello world",
+		num: 321
+	}
+}
 
 let create_bank : () -> Bank = 
 fn(): Bank => {

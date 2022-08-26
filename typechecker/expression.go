@@ -101,7 +101,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
  * Recursively expand every Record name into its expanded form.
  *
  * For instance, "User" --> { name: string, bio: string }
-*/
+ */
 func (tc *TypeChecker) resolve(record ast.RecordType) ast.Type {
 	resolvedFields := make(map[string]ast.Type)
 
@@ -114,14 +114,14 @@ func (tc *TypeChecker) resolve(record ast.RecordType) ast.Type {
 				resolvedFields[field] = tc.resolve(*recordFields)
 
 				continue
-			} 
+			}
 		}
 
 		// if the field isn't a record, keep the original type.
 		resolvedFields[field] = fieldType
 	}
 
-	return &ast.RecordType{ Variables: resolvedFields }
+	return &ast.RecordType{Variables: resolvedFields}
 }
 
 /**
@@ -136,7 +136,7 @@ func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
 		isRecord, recordFields := tc.context.FindType(v.Base)
 
 		if isRecord {
-			firstType = recordFields
+			firstType = tc.resolve(*recordFields)
 		}
 	}
 
@@ -144,7 +144,7 @@ func (tc *TypeChecker) match(first ast.Type, second ast.Type) bool {
 		isRecord, recordFields := tc.context.FindType(v.Base)
 
 		if isRecord {
-			secondType = recordFields
+			secondType = tc.resolve(*recordFields)
 		}
 	}
 
