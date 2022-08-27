@@ -48,15 +48,19 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 }
 
 func (p *Parser) parseRecord() (ast.Type, error) {
-	variables := make(map[string]ast.Type)
-
 	_, leftBraceErr := p.Consume(lexer.L_BRACE, "Expected '{' when declaring struct.")
 
 	if leftBraceErr != nil {
 		return nil, leftBraceErr
 	}
 
-	for p.CurrentToken().Type != lexer.R_BRACE {
+	if p.MatchToken(lexer.R_BRACE) {
+		return &ast.RecordType{Variables: make(map[string]ast.Type)}, nil
+	}
+
+	variables := make(map[string]ast.Type)
+
+	for hasComma := true; hasComma; hasComma = p.MatchToken(lexer.COMMA) {
 		variableName, variableErr := p.Consume(lexer.IDENTIFIER, "Expected variable name")
 
 		if variableErr != nil {
@@ -76,21 +80,6 @@ func (p *Parser) parseRecord() (ast.Type, error) {
 		}
 
 		variables[variableName.Literal] = variableType
-
-		if p.CurrentToken().Type != lexer.R_BRACE {
-			comma, commaErr := p.Consume(
-				lexer.COMMA,
-				"Expected comma after field in record declaration.",
-			)
-
-			if commaErr != nil {
-				return nil, commaErr
-			}
-
-			if p.MatchToken(lexer.R_BRACE) {
-				return nil, CreateParseError(comma.Line, "Tangling ',' after last field in record declaration.")
-			}
-		}
 	}
 
 	_, rightBraceErr := p.Consume(lexer.R_BRACE, "Expected '}' to close record declaration.")

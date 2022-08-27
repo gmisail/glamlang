@@ -2,6 +2,8 @@ let sum : (int, int) -> int = fn(bugs:int, bunny:int): int => {
 	return bugs + bunny
 }
 
+sum(10, 10,)
+
 type Account {
 	balance: float,
 	name: string,

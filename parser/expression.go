@@ -89,7 +89,7 @@ func (p *Parser) parseRecordInstantiation(baseType string) (ast.Expression, erro
 func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expression, error) {
 	arguments := make([]ast.Expression, 0)
 
-	for p.CurrentToken().Type != lexer.R_PAREN {
+	for hasComma := true; hasComma; hasComma = p.MatchToken(lexer.COMMA) {
 		argument, argumentErr := p.parseExpression()
 
 		if argumentErr != nil {
@@ -97,19 +97,6 @@ func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expr
 		}
 
 		arguments = append(arguments, argument)
-
-		// if the next token is ), then there are no more arguments
-		// and we shouldn't expect to see another comma.
-		if p.CurrentToken().Type != lexer.R_PAREN {
-			_, commaErr := p.Consume(
-				lexer.COMMA,
-				"Expected comma after arguments in function call.",
-			)
-
-			if commaErr != nil {
-				return nil, commaErr
-			}
-		}
 	}
 
 	_, rightParenErr := p.Consume(lexer.R_PAREN, "Expected ')' after function call arguments.")
