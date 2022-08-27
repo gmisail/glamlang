@@ -56,11 +56,7 @@ func (p *Parser) parseRecord() (ast.Type, error) {
 		return nil, leftBraceErr
 	}
 
-	for {
-		if !p.MatchToken(lexer.COMMA) && p.MatchToken(lexer.R_BRACE) {
-			break
-		}
-
+	for p.CurrentToken().Type != lexer.R_BRACE {
 		variableName, variableErr := p.Consume(lexer.IDENTIFIER, "Expected variable name")
 
 		if variableErr != nil {
@@ -80,6 +76,27 @@ func (p *Parser) parseRecord() (ast.Type, error) {
 		}
 
 		variables[variableName.Literal] = variableType
+
+		if p.CurrentToken().Type != lexer.R_BRACE {
+			comma, commaErr := p.Consume(
+				lexer.COMMA,
+				"Expected comma after field in record declaration.",
+			)
+
+			if commaErr != nil {
+				return nil, commaErr
+			}
+
+			if p.MatchToken(lexer.R_BRACE) {
+				return nil, CreateParseError(comma.Line, "Tangling ',' after last field in record declaration.")
+			}
+		}
+	}
+
+	_, rightBraceErr := p.Consume(lexer.R_BRACE, "Expected '}' to close record declaration.")
+
+	if rightBraceErr != nil {
+		return nil, rightBraceErr
 	}
 
 	return &ast.RecordType{Variables: variables}, nil

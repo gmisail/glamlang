@@ -3,8 +3,8 @@ let sum : (int, int) -> int = fn(bugs:int, bunny:int): int => {
 }
 
 type Account {
-	balance: float
-	name: string
+	balance: float,
+	name: string,
 	is_overdrawn: bool
 }
 
@@ -25,13 +25,13 @@ type Statement(Node) {
 }
 
 type ListValue {
-	value: string
+	value: string,
 	num: int
 }
 
 type ListNode {
-	next: ListValue
-	current: ListValue
+	next: ListValue,
+	current: ListValue,
 	prev: ListValue
 }
 
