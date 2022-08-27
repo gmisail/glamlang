@@ -42,10 +42,15 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		return &ast.Group{NodeMetadata: ast.CreateMetadata(token.Line), Value: expr}, nil
 	}
 
+	literal := p.CurrentToken().Literal
+	if len(literal) == 0 {
+		literal = lexer.GetSymbol(p.CurrentToken().Type)
+	}
+
 	return nil, &ParseError{
 		message: fmt.Sprintf(
-			"Unexpected token: %s",
-			lexer.TokenTypeToString(p.CurrentToken().Type),
+			"Unexpected token '%s'",
+			literal,
 		),
 		line: p.CurrentToken().Line,
 	}
@@ -89,14 +94,16 @@ func (p *Parser) parseRecordInstantiation(baseType string) (ast.Expression, erro
 func (p *Parser) finishParseCall(startLine int, callee ast.Expression) (ast.Expression, error) {
 	arguments := make([]ast.Expression, 0)
 
-	for hasComma := true; hasComma; hasComma = p.MatchToken(lexer.COMMA) {
-		argument, argumentErr := p.parseExpression()
+	if p.CurrentToken().Type != lexer.R_PAREN {
+		for hasComma := true; hasComma; hasComma = p.MatchToken(lexer.COMMA) {
+			argument, argumentErr := p.parseExpression()
 
-		if argumentErr != nil {
-			return nil, argumentErr
+			if argumentErr != nil {
+				return nil, argumentErr
+			}
+
+			arguments = append(arguments, argument)
 		}
-
-		arguments = append(arguments, argument)
 	}
 
 	_, rightParenErr := p.Consume(lexer.R_PAREN, "Expected ')' after function call arguments.")

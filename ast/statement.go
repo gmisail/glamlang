@@ -28,7 +28,7 @@ func (v *VariableDeclaration) String() string {
 	)
 }
 
-type StructDeclaration struct {
+type RecordDeclaration struct {
 	Statement
 	NodeMetadata
 	Name     string
@@ -36,10 +36,10 @@ type StructDeclaration struct {
 	Inherits string
 }
 
-func (s *StructDeclaration) String() string {
+func (s *RecordDeclaration) String() string {
 	var builder strings.Builder
 
-	builder.WriteString("(StructDeclaration ")
+	builder.WriteString("(RecordDeclaration ")
 	builder.WriteString(s.Record.String())
 	builder.WriteString(")")
 

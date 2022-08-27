@@ -38,8 +38,8 @@ func (tc *TypeChecker) CheckStatement(statement ast.Statement) error {
 		return tc.checkIfStatement(targetStatement)
 	case *ast.WhileStatement:
 		return tc.checkWhileStatement(targetStatement)
-	case *ast.StructDeclaration:
-		return tc.checkStructStatement(targetStatement)
+	case *ast.RecordDeclaration:
+		return tc.checkRecordStatement(targetStatement)
 	case *ast.ReturnStatement:
 		return tc.checkReturnStatement(targetStatement)
 	}
@@ -150,16 +150,16 @@ func (tc *TypeChecker) checkWhileStatement(stat *ast.WhileStatement) error {
 	return nil
 }
 
-func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
+func (tc *TypeChecker) checkRecordStatement(stat *ast.RecordDeclaration) error {
 	isDefined, _ := tc.context.FindType(stat.Name)
 	fields := make(map[string]ast.Type)
 
 	if isDefined {
-		message := fmt.Sprintf("Struct '%s' already defined.", stat.String())
+		message := fmt.Sprintf("Record '%s' already defined.", stat.String())
 		return CreateTypeError(message, stat.Line)
 	}
 
-	for variableName, variableType := range stat.Record.Variables {
+	for variableName, variableType := range stat.Record.Fields {
 		switch innerType := variableType.(type) {
 		case *ast.VariableType:
 			if !tc.context.TypeExists(innerType.Base) {
@@ -184,7 +184,7 @@ func (tc *TypeChecker) checkStructStatement(stat *ast.StructDeclaration) error {
 		fields[variableName] = variableType
 	}
 
-	tc.context.AddType(stat.Name, ast.RecordType{Variables: fields})
+	tc.context.AddType(stat.Name, ast.RecordType{Fields: fields})
 
 	return nil
 }

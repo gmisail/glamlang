@@ -1,0 +1,6 @@
+let sum : (int, int) -> int = fn(x: int, y: int): int => x + y
+
+sum()
+sum(10, 10)
+sum(10,, 10)
+sum(10, 10,)

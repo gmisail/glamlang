@@ -153,6 +153,65 @@ func TokenTypeToString(token TokenType) string {
 	return "?"
 }
 
+func GetSymbol(token TokenType) string {
+	switch token {
+	case EQUAL:
+		return "="
+	case ADD:
+		return "+"
+	case SUB:
+		return "-"
+	case MULT:
+		return "*"
+	case DIV:
+		return "/"
+	case GT:
+		return ">"
+	case GT_EQ:
+		return ">="
+	case LT:
+		return "<"
+	case LT_EQ:
+		return "<="
+	case BANG:
+		return "!"
+	case EQUALITY:
+		return "=="
+	case NOT_EQUAL:
+		return "!="
+	case COMMA:
+		return ","
+	case PERIOD:
+		return "."
+	case COLON:
+		return ":"
+	case L_PAREN:
+		return "("
+	case R_PAREN:
+		return ")"
+	case L_BRACE:
+		return "{"
+	case R_BRACE:
+		return "}"
+	case L_BRACKET:
+		return "["
+	case R_BRACKET:
+		return "]"
+	case QUOTE:
+		return "\""
+	case ARROW:
+		return "->"
+	case THICK_ARROW:
+		return "=>"
+	case QUESTION:
+		return "?"
+	case NULL:
+		return "none"
+	}
+
+	return "?"
+}
+
 func (t *Token) Print() {
 	fmt.Printf("[type: %s, literal: %s]\n", TokenTypeToString(t.Type), t.Literal)
 }

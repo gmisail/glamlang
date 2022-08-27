@@ -105,8 +105,7 @@ func (tc *TypeChecker) CheckExpression(expr ast.Expression) (ast.Type, error) {
 func (tc *TypeChecker) resolve(record ast.RecordType) ast.Type {
 	resolvedFields := make(map[string]ast.Type)
 
-	// TODO: rename Variables to Fields, makes more sense
-	for field, fieldType := range record.Variables {
+	for field, fieldType := range record.Fields {
 		if subRecord, ok := fieldType.(*ast.VariableType); ok {
 			isRecord, recordFields := tc.context.FindType(subRecord.Base)
 
@@ -121,7 +120,7 @@ func (tc *TypeChecker) resolve(record ast.RecordType) ast.Type {
 		resolvedFields[field] = fieldType
 	}
 
-	return &ast.RecordType{Variables: resolvedFields}
+	return &ast.RecordType{Fields: resolvedFields}
 }
 
 /**
@@ -164,7 +163,7 @@ func (tc *TypeChecker) checkRecordInstance(record *ast.RecordInstance) (ast.Type
 		fields[field] = fieldType
 	}
 
-	return &ast.RecordType{Variables: fields}, nil
+	return &ast.RecordType{Fields: fields}, nil
 }
 
 func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, error) {
@@ -186,7 +185,7 @@ func (tc *TypeChecker) checkGetExpression(expr *ast.GetExpression) (ast.Type, er
 			)
 		}
 
-		memberType, memberExists := typeMembers.Variables[expr.Name]
+		memberType, memberExists := typeMembers.Fields[expr.Name]
 
 		if !memberExists {
 			message := fmt.Sprintf(

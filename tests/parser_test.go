@@ -72,7 +72,7 @@ func TestFunctionType(t *testing.T) {
 	}
 }
 
-func TestStructDeclaration(t *testing.T) {
+func TestRecordDeclaration(t *testing.T) {
 	lex := lexer.ScanTokens(`
 		struct Account {
 			balance: int
@@ -86,7 +86,7 @@ func TestStructDeclaration(t *testing.T) {
 		t.Errorf("Expected %d statements, got %d.", 1, len(statements))
 	}
 
-	structDec := statements[0].(*ast.StructDeclaration)
+	structDec := statements[0].(*ast.RecordDeclaration)
 
 	if len(structDec.Variables) != 2 {
 		t.Errorf("Expected %d variables, got %d.", 2, len(structDec.Variables))

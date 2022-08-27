@@ -46,7 +46,7 @@ func (f *FunctionType) String() string {
 
 type RecordType struct {
 	Type
-	Variables map[string]Type
+	Fields map[string]Type
 }
 
 func (r *RecordType) String() string {
@@ -54,7 +54,7 @@ func (r *RecordType) String() string {
 
 	builder.WriteString("{ ")
 
-	for _, v := range r.Variables {
+	for _, v := range r.Fields {
 		builder.WriteString(fmt.Sprintf("%s ", v.String()))
 	}
 
@@ -149,8 +149,8 @@ func (r *RecordType) Equals(otherType Type) bool {
 			Ensure that every property in the calling Record is
 			available in the target Record.
 		*/
-		for variableName, variableType := range r.Variables {
-			if match, ok := target.Variables[variableName]; ok {
+		for variableName, variableType := range r.Fields {
+			if match, ok := target.Fields[variableName]; ok {
 				// TODO: resolve type if it's a record
 				if !variableType.Equals(match) {
 					return false

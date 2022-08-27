@@ -48,17 +48,17 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 }
 
 func (p *Parser) parseRecord() (ast.Type, error) {
-	_, leftBraceErr := p.Consume(lexer.L_BRACE, "Expected '{' when declaring struct.")
+	_, leftBraceErr := p.Consume(lexer.L_BRACE, "Expected '{' when declaring record.")
 
 	if leftBraceErr != nil {
 		return nil, leftBraceErr
 	}
 
 	if p.MatchToken(lexer.R_BRACE) {
-		return &ast.RecordType{Variables: make(map[string]ast.Type)}, nil
+		return &ast.RecordType{Fields: make(map[string]ast.Type)}, nil
 	}
 
-	variables := make(map[string]ast.Type)
+	fields := make(map[string]ast.Type)
 
 	for hasComma := true; hasComma; hasComma = p.MatchToken(lexer.COMMA) {
 		variableName, variableErr := p.Consume(lexer.IDENTIFIER, "Expected variable name")
@@ -79,7 +79,7 @@ func (p *Parser) parseRecord() (ast.Type, error) {
 			return nil, variableTypeErr
 		}
 
-		variables[variableName.Literal] = variableType
+		fields[variableName.Literal] = variableType
 	}
 
 	_, rightBraceErr := p.Consume(lexer.R_BRACE, "Expected '}' to close record declaration.")
@@ -88,10 +88,10 @@ func (p *Parser) parseRecord() (ast.Type, error) {
 		return nil, rightBraceErr
 	}
 
-	return &ast.RecordType{Variables: variables}, nil
+	return &ast.RecordType{Fields: fields}, nil
 }
 
-func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
+func (p *Parser) parseRecordDeclaration() (ast.Statement, error) {
 	identifier, identifierErr := p.Consume(
 		lexer.IDENTIFIER,
 		"Expected name after type definition.",
@@ -131,7 +131,7 @@ func (p *Parser) parseStructDeclaration() (ast.Statement, error) {
 		return nil, CreateParseError(identifier.Line, "Expected record declaration.")
 	}
 
-	return &ast.StructDeclaration{
+	return &ast.RecordDeclaration{
 		Name:         identifier.Literal,
 		Record:       *recordValue,
 		Inherits:     inheritsFrom,
@@ -293,7 +293,7 @@ func (p *Parser) parseStatement() (ast.Statement, error) {
 	} else if p.MatchToken(lexer.WHILE) {
 		return p.parseWhileStatement()
 	} else if p.MatchToken(lexer.TYPE) {
-		return p.parseStructDeclaration()
+		return p.parseRecordDeclaration()
 	} else if p.MatchToken(lexer.RETURN) {
 		return p.parseReturnStatement()
 	}
