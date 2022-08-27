@@ -1,3 +1,0 @@
-type Node = { line: int }
-type Expression = Node & { t: Type }
-type Statement = Node
