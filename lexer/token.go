@@ -207,9 +207,33 @@ func GetSymbol(token TokenType) string {
 		return "?"
 	case NULL:
 		return "none"
+	case TRUE:
+		return "true"
+	case FALSE:
+		return "false"
+	case LET:
+		return "let"
+	case WHILE:
+		return "while"
+	case FOR:
+		return "for"
+	case IF:
+		return "if"
+	case ELSE:
+		return "else"
+	case RETURN:
+		return "return"
+	case TYPE:
+		return "type"
+	case MODULE:
+		return "module"
+	case AND:
+		return "and"
+	case OR:
+		return "or"
 	}
 
-	return "?"
+	return ""
 }
 
 func (t *Token) Print() {
@@ -217,9 +241,10 @@ func (t *Token) Print() {
 }
 
 type Token struct {
-	Type    TokenType
-	Literal string
-	Line    int
-	Start   int
-	Length  int
+	Type     TokenType
+	Literal  string
+	Line     int
+	Relative int
+	Absolute int
+	Length   int
 }

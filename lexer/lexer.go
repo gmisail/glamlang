@@ -184,11 +184,27 @@ func (l *Lexer) SkipWhitespace() {
 
 func (l *Lexer) AddToken(tokenType TokenType, literal string) Token {
 	t := Token{
-		Type:    tokenType,
-		Literal: literal,
-		Line:    l.line,
-		Start:   l.index - len(literal),
-		Length:  len(literal),
+		Type:     tokenType,
+		Literal:  literal,
+		Line:     l.line,
+		Absolute: l.current - len(literal) + 1,
+		Relative: l.index - len(literal) + 1,
+		Length:   len(literal),
+	}
+
+	if t.Type == STRING {
+		t.Absolute -= 2 
+		t.Relative -= 2
+		t.Length += 2 
+	}
+
+	symbol := GetSymbol(tokenType)
+
+	if len(symbol) != 0 {
+		t.Length = len(symbol)
+		t.Absolute = l.current - t.Length + 1
+		t.Relative = l.index - t.Length + 1
+		t.Literal = symbol
 	}
 
 	l.Tokens = append(l.Tokens, t)
