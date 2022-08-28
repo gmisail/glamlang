@@ -29,7 +29,7 @@ func (p *Parser) parseVariableDeclaration() (ast.Statement, error) {
 	}
 
 	var value ast.Expression = nil
-	var exprErr error = nil
+	var exprErr error
 
 	if p.MatchToken(lexer.EQUAL) {
 		value, exprErr = p.parseExpression()

@@ -23,7 +23,11 @@ func (p *Parser) parseTypeDeclaration() (ast.Type, error) {
 			arguments = append(arguments, argumentType)
 		}
 
-		p.Consume(lexer.ARROW, "Expected '->' after argument type declaration.")
+		_, arrowErr := p.Consume(lexer.ARROW, "Expected '->' after argument type declaration.")
+
+		if arrowErr != nil {
+			return nil, arrowErr
+		}
 
 		returnType, _ := p.parseTypeDeclaration()
 

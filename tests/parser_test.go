@@ -88,13 +88,13 @@ func TestRecordDeclaration(t *testing.T) {
 
 	structDec := statements[0].(*ast.RecordDeclaration)
 
-	if len(structDec.Variables) != 2 {
-		t.Errorf("Expected %d variables, got %d.", 2, len(structDec.Variables))
+	if len(structDec.Record.Fields) != 2 {
+		t.Errorf("Expected %d variables, got %d.", 2, len(structDec.Record.Fields))
 	}
 
 	assert.Equal(t, "Account", structDec.Name)
-	assert.Equal(t, "balance", structDec.Variables[0].Name)
-	assert.Equal(t, "credit_limit", structDec.Variables[1].Name)
+	assert.Contains(t, structDec.Record.Fields, "balance")
+	assert.Contains(t, structDec.Record.Fields, "credit_limit")
 }
 
 func TestBlockStatement(t *testing.T) {

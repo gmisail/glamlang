@@ -126,7 +126,7 @@ func (p *Parser) parseCall() (ast.Expression, error) {
 		return nil, primaryErr
 	}
 
-	var callErr error = nil
+	var callErr error
 
 	for {
 		if p.MatchToken(lexer.L_PAREN) {

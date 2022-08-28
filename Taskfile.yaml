@@ -9,3 +9,6 @@ tasks:
   test:
     cmds:
       - go test ./tests -v
+  lint:
+    cmds:
+      - golangci-lint run
