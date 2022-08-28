@@ -22,6 +22,22 @@ func CreateSource(fileName string) *SourceFile {
 	return &SourceFile{contents: string(fileData)}
 }
 
+func (s *SourceFile) CharAt(i int) rune {
+	if i < len(s.contents) && i >= 0 {
+		return rune(s.contents[i])
+	}
+
+	return rune(0)
+}
+
+func (s *SourceFile) IsAtEnd(i int) bool {
+	return len(s.contents) <= i
+}
+
+func (s *SourceFile) GetSpan(from int, to int) string {
+	return s.contents[from:(to + 1)]
+}
+
 func (s *SourceFile) GetLine(absolute int) string {
 	start := absolute
 	end := absolute

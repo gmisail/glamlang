@@ -8,6 +8,7 @@ import (
 
 type Parser struct {
 	current int
+	Lexer   *lexer.Lexer
 	Tokens  []lexer.Token
 }
 
@@ -90,8 +91,8 @@ func (p *Parser) Calibrate() {
 	}
 }
 
-func Parse(tokens []lexer.Token) (bool, []ast.Statement) {
-	parser := &Parser{current: 0, Tokens: tokens}
+func Parse(lexer *lexer.Lexer, tokens []lexer.Token) (bool, []ast.Statement) {
+	parser := &Parser{current: 0, Lexer: lexer, Tokens: tokens}
 	statements := make([]ast.Statement, 0)
 	isValid := true
 

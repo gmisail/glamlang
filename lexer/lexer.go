@@ -3,14 +3,16 @@ package lexer
 import (
 	"fmt"
 	"unicode"
+
+	"github.com/gmisail/glamlang/io"
 )
 
 type Lexer struct {
 	current int
 	line    int
-	input   string
 	index   int
 	Tokens  []Token
+	Input   *io.SourceFile
 }
 
 type LexerError struct {
@@ -45,7 +47,7 @@ func (l *LexerError) Error() string {
 }
 
 func (l *Lexer) IsAtEnd() bool {
-	return len(l.input) <= l.current
+	return l.Input.IsAtEnd(l.current)
 }
 
 func (l *Lexer) AdvanceChar() {
@@ -54,11 +56,7 @@ func (l *Lexer) AdvanceChar() {
 }
 
 func (l *Lexer) CharAt(i int) rune {
-	if i < len(l.input) && i >= 0 {
-		return rune(l.input[i])
-	}
-
-	return rune(0)
+	return l.Input.CharAt(i)
 }
 
 func (l *Lexer) CurrentChar() rune {
@@ -85,7 +83,7 @@ func (l *Lexer) ScanKeyword() (TokenType, string) {
 	}
 
 	end := l.current
-	literal := l.input[start:(end + 1)]
+	literal := l.Input.GetSpan(start, end)
 
 	if tokenType, ok := keywords[literal]; ok {
 		return tokenType, literal
@@ -121,7 +119,7 @@ func (l *Lexer) ScanNumber() (*Token, *LexerError) {
 	}
 
 	end := l.current
-	literal := l.input[start:(end + 1)]
+	literal := l.Input.GetSpan(start, end)
 
 	return &Token{Type: tokenType, Literal: literal}, nil
 }
@@ -162,7 +160,7 @@ func (l *Lexer) ScanString() string {
 	l.AdvanceChar()
 
 	end := l.current
-	literal := l.input[start:end]
+	literal := l.Input.GetSpan(start, end-1)
 
 	return literal
 }
@@ -193,9 +191,9 @@ func (l *Lexer) AddToken(tokenType TokenType, literal string) Token {
 	}
 
 	if t.Type == STRING {
-		t.Absolute -= 2 
+		t.Absolute -= 2
 		t.Relative -= 2
-		t.Length += 2 
+		t.Length += 2
 	}
 
 	symbol := GetSymbol(tokenType)
@@ -300,8 +298,9 @@ func (l *Lexer) ScanToken() bool {
 	return true
 }
 
-func ScanTokens(input string) *Lexer {
-	lexer := Lexer{current: -1, line: 1, index: -1, input: input, Tokens: make([]Token, 0)}
+func ScanTokens(fileName string) *Lexer {
+	source := io.CreateSource(fileName)
+	lexer := Lexer{current: -1, line: 1, index: -1, Input: source, Tokens: make([]Token, 0)}
 
 	for lexer.ScanToken() {
 	}

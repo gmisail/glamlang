@@ -47,6 +47,8 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		literal = lexer.GetSymbol(p.CurrentToken().Type)
 	}
 
+	fmt.Println(p.Lexer.Input.GetLine(p.CurrentToken().Absolute))
+
 	return nil, &ParseError{
 		message: fmt.Sprintf(
 			"Unexpected token '%s'",
