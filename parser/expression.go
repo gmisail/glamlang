@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
+	"github.com/gmisail/glamlang/util"
 )
 
 func (p *Parser) parsePrimary() (ast.Expression, error) {
@@ -47,14 +48,13 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		literal = lexer.GetSymbol(p.CurrentToken().Type)
 	}
 
-	fmt.Println(p.Lexer.Input.GetLine(p.CurrentToken().Absolute))
-
 	return nil, &ParseError{
+		source: p.Lexer.Input,
+		token:  p.CurrentToken(),
 		message: fmt.Sprintf(
 			"Unexpected token '%s'",
 			literal,
 		),
-		line: p.CurrentToken().Line,
 	}
 }
 

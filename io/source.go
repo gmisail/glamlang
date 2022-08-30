@@ -39,6 +39,10 @@ func (s *SourceFile) GetSpan(from int, to int) string {
 }
 
 func (s *SourceFile) GetLine(absolute int) string {
+	if s.IsAtEnd(absolute) {
+		return ""
+	}
+
 	start := absolute
 	end := absolute
 

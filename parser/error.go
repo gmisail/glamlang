@@ -1,20 +1,29 @@
 package parser
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gmisail/glamlang/io"
+	"github.com/gmisail/glamlang/lexer"
+	"github.com/gmisail/glamlang/util"
+)
 
 type ParseError struct {
-	line    int
+	source  *io.SourceFile
+	token   *lexer.Token
 	message string
 }
 
 func (p *ParseError) Error() string {
-	if p.line == 0 {
+	if p.token.Line == 0 {
 		return fmt.Sprintf("EOF: %s", p.message)
 	}
 
-	return fmt.Sprintf("line %d: %s", p.line, p.message)
+	hint := util.Hint(p.source, p.token, p.message)
+
+	return fmt.Sprintf("Error at line %d:\n%s", p.token.Line, hint)
 }
 
-func CreateParseError(line int, message string) *ParseError {
-	return &ParseError{line, message}
+func CreateParseError(source *io.SourceFile, token *lexer.Token, message string) *ParseError {
+	return &ParseError{source, token, message}
 }
