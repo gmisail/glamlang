@@ -91,7 +91,7 @@ let mul : (int, int) -> int = fn(bugs:int, bunny:int): int => {
 	return bugs * bunny 
 }
 
-let play_song : (string, Album) -> bool = fn (song: string, album: Album): bool => {
+let play_song : (string, Album) -> bool = fn(song: string, album: Album): bool => {
 	if (album.song != song) {
 		return false
 	}

@@ -128,7 +128,7 @@ func (p *Parser) parseRecordDeclaration() (ast.Statement, error) {
 	recordValue, isRecord := record.(*ast.RecordType)
 
 	if !isRecord {
-		return nil, CreateParseError(identifier.Line, "Expected record declaration.")
+		return nil, CreateParseError(p.Lexer.Input, identifier, "Expected record declaration.")
 	}
 
 	return &ast.RecordDeclaration{

@@ -15,6 +15,10 @@ func Hint(source *io.SourceFile, token *lexer.Token, message string) string {
 		return ""
 	}
 
+	if source == nil || token == nil {
+		return message
+	}
+
 	builder.WriteString(source.GetLine(token.Absolute) + "\n")
 	builder.WriteString(strings.Repeat(" ", token.Relative-1))
 	builder.WriteString(strings.Repeat("^", token.Length) + "\n")

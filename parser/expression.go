@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gmisail/glamlang/ast"
 	"github.com/gmisail/glamlang/lexer"
-	"github.com/gmisail/glamlang/util"
 )
 
 func (p *Parser) parsePrimary() (ast.Expression, error) {

@@ -74,10 +74,10 @@ func (p *Parser) Consume(tokenType lexer.TokenType, message string) (*lexer.Toke
 		currentToken := p.CurrentToken()
 
 		if currentToken != nil {
-			return nil, &ParseError{message: message, line: currentToken.Line}
+			return nil, &ParseError{message: message, token: currentToken, source: p.Lexer.Input}
 		}
 
-		return nil, &ParseError{message: message, line: 0}
+		return nil, &ParseError{message: message, token: nil, source: p.Lexer.Input}
 	}
 
 	return p.PreviousToken(), nil
