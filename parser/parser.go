@@ -12,6 +12,10 @@ type Parser struct {
 	Tokens  []lexer.Token
 }
 
+func (p *Parser) CreateError(token *lexer.Token, message string) *ParseError {
+	return CreateParseError(p.Lexer.Input, token, message)
+}
+
 func (p *Parser) AdvanceToken() {
 	p.current += 1
 }
@@ -74,10 +78,10 @@ func (p *Parser) Consume(tokenType lexer.TokenType, message string) (*lexer.Toke
 		currentToken := p.CurrentToken()
 
 		if currentToken != nil {
-			return nil, CreateParseError(p.Lexer.Input, currentToken, message)
+			return nil, p.CreateError(currentToken, message)
 		}
 
-		return nil, CreateParseError(p.Lexer.Input, nil, message)
+		return nil, p.CreateError(nil, message)
 	}
 
 	return p.PreviousToken(), nil
