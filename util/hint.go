@@ -27,7 +27,9 @@ func Hint(source *io.SourceFile, token *lexer.Token, message string) string {
 	messageMidpoint := len(message) / 2
 
 	// the first half of the message can fit
-	builder.WriteString(strings.Repeat(" ", int(math.Max(0, float64(hintMidpoint-messageMidpoint)))))
+	builder.WriteString(
+		strings.Repeat(" ", int(math.Max(0, float64(hintMidpoint-messageMidpoint)))),
+	)
 	builder.WriteString(message)
 
 	return builder.String()
