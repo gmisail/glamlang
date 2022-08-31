@@ -47,14 +47,7 @@ func (p *Parser) parsePrimary() (ast.Expression, error) {
 		literal = lexer.GetSymbol(p.CurrentToken().Type)
 	}
 
-	return nil, &ParseError{
-		source: p.Lexer.Input,
-		token:  p.CurrentToken(),
-		message: fmt.Sprintf(
-			"Unexpected token '%s'",
-			literal,
-		),
-	}
+	return nil, CreateParseError(p.Lexer.Input, p.CurrentToken(), fmt.Sprintf("Unexpected token '%s'", literal))
 }
 
 func (p *Parser) parseRecordInstantiation(baseType string) (ast.Expression, error) {
