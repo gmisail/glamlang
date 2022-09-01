@@ -57,11 +57,18 @@ let listNode : ListNode = ListNode {
 	}
 }
 
+if ("true" > "test") {
+
+}
+
 let create_bank : () -> Bank = fn(): Bank => {
 	return 0
 }
 
 let bank : Bank = create_bank(10)
+
+let negative : int = -100
+let bad_negative : int = -"hello"
 
 let mul : (int, int) -> int = fn(bugs:int, bunny:int): int => {
 	if (bugs == 0) {
