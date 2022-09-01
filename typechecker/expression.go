@@ -291,9 +291,16 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 		return nil, CreateTypeError(message, expr.Line)
 	}
 
-	// TODO: add rules depending on the operation
-	// e.g. true + true --> invalid
-	// 		true < false --> invalid
+	isValid := HasBinaryRule(expr.Operator, leftType.String())
+
+	if !isValid {
+		message := fmt.Sprintf(
+			"Cannot apply operation to type %s.",
+			leftType.String(),
+		)
+
+		return nil, CreateTypeError(message, expr.Line)
+	}
 
 	switch expr.Operator {
 	case lexer.LT,
@@ -316,15 +323,26 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 }
 
 func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
+	valueType, valueErr := tc.CheckExpression(expr.Value)
+
+	if valueErr != nil {
+		return nil, valueErr
+	}
+
+	isValid := HasUnaryRule(expr.Operator, valueType.String())
+
+	if !isValid {
+		message := fmt.Sprintf(
+			"Cannot apply operation to type %s.",
+			valueType.String(),
+		)
+
+		return nil, CreateTypeError(message, expr.Line)
+	}
+
 	switch expr.Operator {
 	case lexer.BANG:
 		// !(boolean expression)
-		valueType, valueErr := tc.CheckExpression(expr.Value)
-
-		if valueErr != nil {
-			return nil, valueErr
-		}
-
 		if !tc.match(valueType, ast.CreateTypeFromLiteral(lexer.BOOL)) {
 			message := fmt.Sprintf(
 				"Expected type in 'not' expression to be bool, instead got incompatible type %s.",
@@ -339,12 +357,6 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 		return valueType, nil
 	case lexer.SUB:
 		// -(number)
-		valueType, valueErr := tc.CheckExpression(expr.Value)
-
-		if valueErr != nil {
-			return nil, valueErr
-		}
-
 		if !tc.match(valueType, ast.CreateTypeFromLiteral(lexer.INT)) &&
 			!tc.match(valueType, ast.CreateTypeFromLiteral(lexer.FLOAT)) {
 			message := fmt.Sprintf(
