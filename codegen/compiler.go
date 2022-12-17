@@ -1,44 +1,51 @@
+// Compiles an AST into LLVM IR.
+
 package codegen
 
 import (
-	"fmt"
-
 	"github.com/gmisail/glamlang/ast"
-	"github.com/gmisail/glamlang/codegen/backend"
+	"tinygo.org/x/go-llvm"
 )
 
 type Compiler struct {
-	//module *ir.Module
+	module  llvm.Module
+	builder llvm.Builder
 }
 
-func (compiler *Compiler) compileStatement(statement ast.Statement) error {
+func (compiler *Compiler) compileStatement(statement ast.Statement) llvm.Value {
 	switch target := statement.(type) {
-	case *ast.VariableDeclaration:
-		return compiler.compileVariableDeclaration(target)
+	case *ast.ExpressionStatement:
+		return compiler.compileExpression(target.Value)
 	}
 
-	return fmt.Errorf("Unknown statement")
+	return llvm.ConstNull(llvm.VoidType())
 }
 
-func (compiler *Compiler) compileVariableDeclaration(decl *ast.VariableDeclaration) error {
-	name := decl.Name
+func (compiler *Compiler) compileExpression(expr ast.Expression) llvm.Value {
+	switch target := expr.(type) {
+	case *ast.Literal:
+		return llvm.ConstFloat(llvm.FloatType(), 10.0)
+	case *ast.Binary:
+		return compiler.compileBinary(*target)
+	}
 
-	fmt.Println(backend.EmitRecord("Compiler"))
-	fmt.Println(backend.EmitVariableDeclaration("int", name, backend.EmitBinary("+", "5", "10")))
-
-	return nil
+	return llvm.ConstNull(llvm.VoidType())
 }
 
-func (compiler *Compiler) dump() string {
-	return ""
+func (compiler *Compiler) compileBinary(bin ast.Binary) llvm.Value {
+	left := compiler.compileExpression(bin.Left)
+	right := compiler.compileExpression(bin.Right)
+
+	return compiler.builder.CreateFAdd(left, right, "tmp_add")
 }
 
-func Compile(statements []ast.Statement) string {
-	compiler := Compiler{}
+func Compile(statements []ast.Statement) {
+	compiler := Compiler{
+		llvm.NewModule("glam"),
+		llvm.NewBuilder(),
+	}
 
 	for _, statement := range statements {
-		compiler.compileStatement(statement)
+		compiler.compileStatement(statement).Dump()
 	}
-
-	return compiler.dump()
 }

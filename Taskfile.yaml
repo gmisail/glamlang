@@ -4,7 +4,7 @@ tasks:
   build:
     cmds:
       - gofmt -w .
-      - go build .
+      - go build --tags=llvm14 .
       - ./glamlang {{.CLI_ARGS}}
   test:
     cmds:

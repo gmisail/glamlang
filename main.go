@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -41,7 +40,7 @@ func main() {
 	color.Blue("[glam] Done type checking in %s.", time.Since(start))
 
 	start = time.Now()
-	fmt.Println(codegen.Compile(statements))
+	codegen.Compile(statements)
 
 	color.Blue("[glam] Done compiling in %s.", time.Since(start))
 }
