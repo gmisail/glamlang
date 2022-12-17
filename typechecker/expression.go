@@ -295,7 +295,8 @@ func (tc *TypeChecker) checkBinary(expr *ast.Binary) (ast.Type, error) {
 
 	if !isValid {
 		message := fmt.Sprintf(
-			"Cannot apply operation to type %s.",
+			"Cannot apply operation '%s' to type %s.",
+			lexer.GetSymbol(expr.Operator),
 			leftType.String(),
 		)
 
@@ -333,7 +334,8 @@ func (tc *TypeChecker) checkUnary(expr *ast.Unary) (ast.Type, error) {
 
 	if !isValid {
 		message := fmt.Sprintf(
-			"Cannot apply operation to type %s.",
+			"Cannot apply operation '%s' to type %s.",
+			lexer.GetSymbol(expr.Operator),
 			valueType.String(),
 		)
 
