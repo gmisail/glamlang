@@ -1,5 +1,7 @@
 package ast
 
+import "tinygo.org/x/go-llvm"
+
 type Type interface {
 	Equals(Type) bool
 	String() string
@@ -7,6 +9,7 @@ type Type interface {
 
 type Node interface {
 	String() string
+	Codegen() llvm.Value
 	GetLine() int
 }
 

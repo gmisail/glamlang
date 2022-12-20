@@ -9,6 +9,7 @@ import (
 
 type Compiler struct {
 	module  llvm.Module
+	context llvm.Context
 	builder llvm.Builder
 }
 
@@ -36,12 +37,13 @@ func (compiler *Compiler) compileBinary(bin ast.Binary) llvm.Value {
 	left := compiler.compileExpression(bin.Left)
 	right := compiler.compileExpression(bin.Right)
 
-	return compiler.builder.CreateFAdd(left, right, "tmp_add")
+	return compiler.builder.CreateFAdd(left, right, "add")
 }
 
 func Compile(statements []ast.Statement) {
 	compiler := Compiler{
 		llvm.NewModule("glam"),
+		llvm.GlobalContext(),
 		llvm.NewBuilder(),
 	}
 

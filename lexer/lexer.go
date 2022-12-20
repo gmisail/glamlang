@@ -25,23 +25,6 @@ type TokenPair struct {
 	tokenType TokenType
 }
 
-var keywords = map[string]TokenType{
-	"let":    LET,
-	"while":  WHILE,
-	"for":    FOR,
-	"if":     IF,
-	"else":   ELSE,
-	"true":   TRUE,
-	"false":  FALSE,
-	"fn":     FUNCTION,
-	"and":    AND,
-	"or":     OR,
-	"type":   TYPE,
-	"mod":    MODULE,
-	"return": RETURN,
-	"new":    NEW,
-}
-
 func (l *LexerError) Error() string {
 	return fmt.Sprintf("line %d: %s\n", l.line, l.message)
 }
@@ -85,12 +68,8 @@ func (l *Lexer) ScanKeyword() (TokenType, string) {
 	end := l.current
 	literal := l.Input.GetSpan(start, end)
 
-	if tokenType, ok := keywords[literal]; ok {
-		return tokenType, literal
-	}
-
 	// if the keyword isn't registered, then it is an ID
-	return IDENTIFIER, literal
+	return LookupKeyword(literal), literal
 }
 
 func (l *Lexer) ScanNumber() (*Token, *LexerError) {
