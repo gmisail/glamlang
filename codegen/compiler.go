@@ -3,51 +3,38 @@
 package codegen
 
 import (
+	"fmt"
+
 	"github.com/gmisail/glamlang/ast"
-	"tinygo.org/x/go-llvm"
 )
 
+/*
 type Compiler struct {
 	module  llvm.Module
 	context llvm.Context
 	builder llvm.Builder
-}
+}*/
 
-func (compiler *Compiler) compileStatement(statement ast.Statement) llvm.Value {
-	switch target := statement.(type) {
-	case *ast.ExpressionStatement:
-		return compiler.compileExpression(target.Value)
-	}
-
-	return llvm.ConstNull(llvm.VoidType())
-}
-
-func (compiler *Compiler) compileExpression(expr ast.Expression) llvm.Value {
-	switch target := expr.(type) {
-	case *ast.Literal:
-		return llvm.ConstFloat(llvm.FloatType(), 10.0)
-	case *ast.Binary:
-		return compiler.compileBinary(*target)
-	}
-
-	return llvm.ConstNull(llvm.VoidType())
-}
-
-func (compiler *Compiler) compileBinary(bin ast.Binary) llvm.Value {
-	left := compiler.compileExpression(bin.Left)
-	right := compiler.compileExpression(bin.Right)
-
-	return compiler.builder.CreateFAdd(left, right, "add")
-}
-
-func Compile(statements []ast.Statement) {
-	compiler := Compiler{
+func Compile(emitter Emitter, statements []ast.Statement) {
+	/*compiler := Compiler{
 		llvm.NewModule("glam"),
 		llvm.GlobalContext(),
 		llvm.NewBuilder(),
-	}
+	}*/
 
-	for _, statement := range statements {
-		compiler.compileStatement(statement).Dump()
-	}
+	fmt.Println(emitter.EmitUnary("-", "7"))
+	fmt.Println(emitter.EmitBinary("*", "10", "100"))
+
+	fmt.Println(emitter.EmitVariableDeclaration("temp_value", "int", emitter.EmitBinary("*", emitter.EmitUnary("-", "7"), "100")))
+
+	fmt.Println(emitter.EmitRecordDeclaration("Token", map[string]string{
+		"literal":  "string",
+		"location": "int",
+	}))
+
+	fmt.Println(emitter.EmitVariableDeclaration("x", "int", emitter.EmitBinary("*", "10", emitter.EmitUnary("-", "50"))))
+
+	/*for _, statement := range statements {
+		statement.Codegen()
+	}*/
 }

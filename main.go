@@ -40,7 +40,8 @@ func main() {
 	color.Blue("[glam] Done type checking in %s.", time.Since(start))
 
 	start = time.Now()
-	codegen.Compile(statements)
+
+	codegen.Compile(codegen.GetNativeBackend(), statements)
 
 	color.Blue("[glam] Done compiling in %s.", time.Since(start))
 }
