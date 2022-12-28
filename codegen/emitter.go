@@ -1,8 +1,12 @@
 package codegen
 
-import "github.com/gmisail/glamlang/codegen/backend"
+import (
+	"github.com/gmisail/glamlang/ast"
+	"github.com/gmisail/glamlang/codegen/backend"
+)
 
 type Emitter interface {
+	ResolveLiteral(*ast.Literal) string
 	EmitGroup(string) string
 	EmitUnary(string, string) string
 	EmitBinary(string, string, string) string

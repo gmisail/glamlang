@@ -5,9 +5,33 @@ package backend
 import (
 	"fmt"
 	"strings"
+
+	"github.com/gmisail/glamlang/ast"
+	"github.com/gmisail/glamlang/lexer"
 )
 
 type NativeEmitter struct{}
+
+func (e NativeEmitter) ResolveLiteral(node *ast.Literal) string {
+	switch node.LiteralType {
+	case lexer.BOOL:
+		value := node.Value.(bool)
+
+		if value {
+			return "true"
+		}
+
+		return "false"
+	case lexer.INT:
+		return fmt.Sprintf("%s", node.Value.(string))
+	case lexer.FLOAT:
+		return fmt.Sprintf("%s", node.Value.(string))
+	case lexer.STRING:
+		return fmt.Sprintf("\"%s\"", node.Value.(string))
+	}
+
+	return ""
+}
 
 func (e NativeEmitter) EmitGroup(operation string) string {
 	return "(" + operation + ")"
